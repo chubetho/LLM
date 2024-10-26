@@ -1,29 +1,16 @@
 import ollama from 'ollama'
 
 type Status = 'idle' | 'pending' | 'done' | 'error'
-let model: string | undefined
 
 export function useLLM() {
   const status = ref<Status>('idle')
 
-  ollama.list().then((response) => {
-    model = response.models.at(0)?.name
-  }).catch((e) => {
-    status.value = 'error'
-    console.error(e)
-  })
-
   const chat = async (c: string) => {
-    if (!model) {
-      status.value = 'error'
-      return ''
-    }
-
     ollama.abort()
     status.value = 'pending'
     try {
       const response = await ollama.chat({
-        model,
+        model: 'llama3.2',
         messages: [{ role: 'user', content: c }],
         // stream: false,
         // format: 'json',
@@ -40,16 +27,11 @@ export function useLLM() {
   }
 
   const sChat = async (c: string, cb: (text: string) => void) => {
-    if (!model) {
-      status.value = 'error'
-      return
-    }
-
     ollama.abort()
     status.value = 'pending'
     try {
       const response = await ollama.chat({
-        model,
+        model: 'llama3.2',
         messages: [{ role: 'user', content: c }],
         stream: true,
       })
