@@ -3,8 +3,10 @@ import './assets/tailwind.css'
 </script>
 
 <template>
-  <div>
-    <NuxtPage />
+  <div class="h-screen flex justify-center items-center">
+    <div class="relative border rounded-lg overflow-hidden w-full h-full max-w-[80vw] max-h-[90vh]">
+      <NuxtPage />
+    </div>
   </div>
 </template>
 
@@ -15,6 +17,5 @@ body,
   height: 100vh;
   margin: 0;
   padding: 0;
-  @apply border-border bg-background text-foreground;
 }
 </style>
