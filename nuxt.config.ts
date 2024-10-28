@@ -6,7 +6,6 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     'shadcn-nuxt',
     '@nuxtjs/color-mode',
-    '@nuxt/icon',
     '@nuxt/fonts',
   ],
 
@@ -22,14 +21,6 @@ export default defineNuxtConfig({
     prefix: '',
     componentDir: './components/ui',
   },
-
-  components: [
-    {
-      path: './components/ui',
-      extensions: ['.vue'],
-      prefix: 'Ui',
-    },
-  ],
 
   experimental: {
     typedPages: true,
