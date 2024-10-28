@@ -6,7 +6,6 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     'shadcn-nuxt',
     '@nuxtjs/color-mode',
-    '@nuxt/fonts',
   ],
 
   compatibilityDate: '2024-04-03',
@@ -17,10 +16,12 @@ export default defineNuxtConfig({
     classSuffix: '',
   },
 
-  shadcn: {
-    prefix: '',
-    componentDir: './components/ui',
-  },
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false,
+    },
+  ],
 
   experimental: {
     typedPages: true,
@@ -31,9 +32,6 @@ export default defineNuxtConfig({
       options: {
         target: 'esnext',
       },
-    },
-    prerender: {
-      crawlLinks: true,
     },
   },
 
@@ -47,6 +45,12 @@ export default defineNuxtConfig({
   eslint: {
     config: {
       standalone: false,
+    },
+  },
+
+  app: {
+    head: {
+      title: 'Queezee',
     },
   },
 
