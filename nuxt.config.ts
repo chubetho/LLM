@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     'shadcn-nuxt',
     '@nuxtjs/color-mode',
+    '@nuxt/fonts',
   ],
 
   compatibilityDate: '2024-04-03',

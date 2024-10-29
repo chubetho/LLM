@@ -12,7 +12,7 @@ function insertSet() {
 <template>
   <BasePageWrap>
     <template #heading>
-      All Quizzes
+      all quizzes
     </template>
 
     <ul class="grid gap-3 grid-cols-4">
@@ -32,7 +32,7 @@ function insertSet() {
             </CardHeader>
             <CardContent>
               <ul class="flex flex-wrap gap-1 pb-3">
-                <li v-for="tag in set.hashtags" :key="tag">
+                <li v-for="tag in set.tags" :key="tag">
                   <Badge variant="secondary">
                     {{ tag }}
                   </Badge>
@@ -41,7 +41,7 @@ function insertSet() {
             </CardContent>
             <CardFooter class="text-xs text-muted-foreground flex justify-between mt-auto">
               <span>
-                Created at {{ set.createdAt }}
+                Created at {{ set.createAt }}
               </span>
               <span>
                 ({{ set.cards.length }})

@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { Bot, Layers, MessageSquare } from 'lucide-vue-next'
+import { Bot, Layers, MessageSquare, Moon, Sun } from 'lucide-vue-next'
+
+const colorMode = useColorMode()
+
+function toggleColorMode() {
+  colorMode.preference = colorMode.preference === 'dark' ? 'light' : 'dark'
+}
 </script>
 
 <template>
   <aside class="flex flex-col border-r">
     <div class="border-b p-2">
       <Button variant="outline" size="icon">
-        <Bot class="size-5" />
+        <Bot class="size-6" />
       </Button>
     </div>
-    <nav class="grid gap-2 p-2">
+    <nav class="flex flex-col h-full gap-2 p-2">
       <NuxtLink to="/" active-class="[&>button]:bg-muted">
         <Button
           variant="ghost"
@@ -27,6 +33,16 @@ import { Bot, Layers, MessageSquare } from 'lucide-vue-next'
           <MessageSquare class="size-5" />
         </Button>
       </NuxtLink>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        class="mt-auto"
+        @click="toggleColorMode"
+      >
+        <Moon v-if="colorMode.preference === 'dark'" class="size-5" />
+        <Sun v-if="colorMode.preference === 'light'" class="size-5" />
+      </Button>
     </nav>
   </aside>
 </template>

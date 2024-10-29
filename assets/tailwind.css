@@ -16,7 +16,7 @@
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
 
-    --border: 240 5.9% 90%;
+    --border: 240 5.9% 85%;
     --input: 240 5.9% 90%;
 
     --primary: 240 5.9% 10%;
@@ -74,5 +74,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Monaspace Neon";
   }
 }
