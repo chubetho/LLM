@@ -74,7 +74,7 @@ async function createSet() {
             create
           </Button>
         </div>
-        <ScrollArea class="h-[36rem] border rounded-lg py-4 px-2">
+        <ScrollArea class="h-[80lvh] border rounded-lg py-4 px-2">
           <ul class="grid gap-2 w-[calc(100%-2.25rem)]">
             <li
               v-for="(card, i) in set.cards"

@@ -26,28 +26,30 @@ function insertSet() {
       </li>
       <template v-if="sets">
         <li v-for="set in sets" :key="set.id">
-          <Card class="hover:border-primary transition-colors cursor-pointer h-full flex flex-col">
-            <CardHeader>
-              <CardTitle>{{ set.name }}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul class="flex flex-wrap gap-1 pb-3">
-                <li v-for="tag in set.tags" :key="tag">
-                  <Badge variant="secondary">
-                    {{ tag }}
-                  </Badge>
-                </li>
-              </ul>
-            </CardContent>
-            <CardFooter class="text-xs text-muted-foreground flex justify-between mt-auto">
-              <span>
-                Created at {{ set.createAt }}
-              </span>
-              <span>
-                ({{ set.cards.length }})
-              </span>
-            </CardFooter>
-          </Card>
+          <NuxtLink class="group" :to="`/sets/${set.id}`">
+            <Card class="group-hover:border-primary transition-colors h-full flex flex-col">
+              <CardHeader>
+                <CardTitle>{{ set.name }}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul class="flex flex-wrap gap-1 pb-3">
+                  <li v-for="tag in set.tags" :key="tag">
+                    <Badge variant="secondary">
+                      {{ tag }}
+                    </Badge>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter class="text-xs text-muted-foreground flex justify-between mt-auto">
+                <span>
+                  Created at {{ set.createAt }}
+                </span>
+                <span>
+                  ({{ set.cards.length }})
+                </span>
+              </CardFooter>
+            </Card>
+          </NuxtLink>
         </li>
       </template>
     </ul>

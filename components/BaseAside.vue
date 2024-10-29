@@ -11,8 +11,13 @@ function toggleColorMode() {
 <template>
   <aside class="flex flex-col border-r">
     <div class="border-b p-2">
-      <Button variant="outline" size="icon">
-        <Bot class="size-6" />
+      <Button
+        variant="ghost"
+        size="icon"
+        @click="toggleColorMode"
+      >
+        <Moon v-if="colorMode.preference === 'dark'" class="size-5" />
+        <Sun v-if="colorMode.preference === 'light'" class="size-5" />
       </Button>
     </div>
     <nav class="flex flex-col h-full gap-2 p-2">
@@ -33,16 +38,6 @@ function toggleColorMode() {
           <MessageSquare class="size-5" />
         </Button>
       </NuxtLink>
-
-      <Button
-        variant="ghost"
-        size="icon"
-        class="mt-auto"
-        @click="toggleColorMode"
-      >
-        <Moon v-if="colorMode.preference === 'dark'" class="size-5" />
-        <Sun v-if="colorMode.preference === 'light'" class="size-5" />
-      </Button>
     </nav>
   </aside>
 </template>

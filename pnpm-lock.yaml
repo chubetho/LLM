@@ -28,6 +28,9 @@ importers:
       drizzle-orm:
         specifier: ^0.35.3
         version: 0.35.3(@libsql/client-wasm@0.14.0)(@types/better-sqlite3@7.6.11)(better-sqlite3@11.5.0)
+      embla-carousel-vue:
+        specifier: ^8.3.1
+        version: 8.3.1(vue@3.5.12(typescript@5.6.3))
       lucide-vue-next:
         specifier: ^0.453.0
         version: 0.453.0(vue@3.5.12(typescript@5.6.3))
@@ -2727,6 +2730,19 @@ packages:
 
   electron-to-chromium@1.5.47:
     resolution: {integrity: sha512-zS5Yer0MOYw4rtK2iq43cJagHZ8sXN0jDHDKzB+86gSBSAI4v07S97mcq+Gs2vclAxSh1j7vOAHxSVgduiiuVQ==}
+
+  embla-carousel-reactive-utils@8.3.1:
+    resolution: {integrity: sha512-Js6rTTINNGnUGPu7l5kTcheoSbEnP5Ak2iX0G9uOoI8okTNLMzuWlEIpYFd1WP0Sq82FFcLkKM2oiO6jcElZ/Q==}
+    peerDependencies:
+      embla-carousel: 8.3.1
+
+  embla-carousel-vue@8.3.1:
+    resolution: {integrity: sha512-PfCvJeHLQgI0BfFkGDEeOcYJLhJzzTrSg8ukUJJWHnFJ00S//f3vG6U4sKGOELEnEW7Zj+JOEV/xRuX7DbMV8g==}
+    peerDependencies:
+      vue: ^3.2.37
+
+  embla-carousel@8.3.1:
+    resolution: {integrity: sha512-DutFjtEO586XptDn4cwvBJwsR/8fMa4jUk5Jk2g+/elKgu8mdn0Z2sx33g4JskvbLc1/6P8Xg4QlfELGJFcP5A==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -7978,6 +7994,18 @@ snapshots:
   ee-first@1.1.1: {}
 
   electron-to-chromium@1.5.47: {}
+
+  embla-carousel-reactive-utils@8.3.1(embla-carousel@8.3.1):
+    dependencies:
+      embla-carousel: 8.3.1
+
+  embla-carousel-vue@8.3.1(vue@3.5.12(typescript@5.6.3)):
+    dependencies:
+      embla-carousel: 8.3.1
+      embla-carousel-reactive-utils: 8.3.1(embla-carousel@8.3.1)
+      vue: 3.5.12(typescript@5.6.3)
+
+  embla-carousel@8.3.1: {}
 
   emoji-regex@8.0.0: {}
 
