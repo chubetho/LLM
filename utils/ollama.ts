@@ -17,3 +17,7 @@ export async function chat(input: string, opt?: Option) {
 
   return response.message.content
 }
+
+export function abort() {
+  ollama.abort()
+}

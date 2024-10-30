@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, Disc3 } from 'lucide-vue-next'
+import QuestionFillBlank from '~/components/question/QuestionFillBlank.vue'
+import QuestionMultipleChoice from '~/components/question/QuestionMultipleChoice.vue'
+import QuestionTrueFalse from '~/components/question/QuestionTrueFalse.vue'
 import type { CarouselApi } from '~/components/ui/carousel'
 import type { Set } from '~/db'
+import type { Question } from '~/utils/types'
 
 const route = useRoute('sets-id')
 const setId = route.params.id
@@ -15,7 +19,7 @@ function setApi(val: CarouselApi) {
   api.value = val
 }
 
-watchOnce(api, (api) => {
+watch(api, (api) => {
   if (!api)
     return
 
@@ -25,34 +29,62 @@ watchOnce(api, (api) => {
   api.on('select', () => {
     current.value = api.selectedScrollSnap() + 1
   })
-})
+}, { once: true })
 
-async function demo() {
-  console.log(set.value?.cards)
-  const response = await chat(`Using the following flashcard data, create a set of comprehensive test questions that assess understanding, recall, and application:
+const isTesting = ref(false)
 
-Cards:
-ID: 1, Term: 'What is the powerhouse of the cell?', Definition: 'The mitochondria.'
-ID: 2, Term: 'What is the capital of France?', Definition: 'Paris.'
-ID: 3, Term: 'What is the boiling point of water?', Definition: '100°C.'
-Generate multiple question formats (e.g., multiple-choice, short answer, fill-in-the-blank) to cover each topic, focusing on varied difficulty levels to thoroughly evaluate mastery of these topics.`, { format: 'json' })
-  console.log(response)
+const questions = ref<Question[]>([])
+async function test() {
+  if (!set.value)
+    return
+
+  isTesting.value = true
+
+  const response = await chat(`
+Using the following flashcards: ${JSON.stringify(set.value.cards)},
+generate a JSON object with a "questions" key containing an array of questions in these formats:
+
+1. **Fill-in-the-blank**: {"type": "fill_blank", "question": "<sentence with '[blank]' as a placeholder for the answer>", "answer": "<correct answer>"}.
+2. **Multiple-choice**: {"type": "multiple_choice", "question": "<question>", "options": ["<option1>", "<option2>", "<option3>", "<option4>"], "answer": "<correct option>"}.
+3. **True/False**: {"type": "true_false", "question": "<question>", "answer": "<true or false>"}.
+
+Make sure questions are directly based on the flashcard content, clear, and formatted in plain text without any HTML, markup, or special formatting. Each question type should appear at least twice.`, { format: 'json' })
+
+  questions.value = JSON.parse(response).questions
+  console.log(questions.value)
+}
+
+function cancel() {
+  abort()
+  isTesting.value = false
+}
+
+const questionRefs = ref<(
+  InstanceType<typeof QuestionFillBlank>
+  | InstanceType<typeof QuestionMultipleChoice>
+  | InstanceType<typeof QuestionTrueFalse>
+)[]>([])
+
+function submit() {
+  for (const q of questionRefs.value) {
+    console.log(q.validate())
+  }
 }
 </script>
 
 <template>
-  <BasePageWrap v-if="set">
+  <BasePageWrap>
     <template #heading>
       <div class="flex items-center gap-2 flex-wrap">
         <NuxtLink to="/" class="inline-flex items-center gap-2 transition-transform hover:-translate-x-1">
           <ArrowLeft class="size-4" />
-          <span>{{ set.name }}</span>
+          <span>{{ set?.name ?? 'not found' }}</span>
         </NuxtLink>
       </div>
     </template>
 
-    <div>
-      <div class="flex items-center gap-1 mb-12">
+    <div v-if="set">
+      <div class="flex items-center gap-1 mb-6">
         <span>tags: </span>
         <ul class="flex flex-wrap gap-1">
           <li
@@ -66,40 +98,95 @@ Generate multiple question formats (e.g., multiple-choice, short answer, fill-in
         </ul>
       </div>
 
-      <div class="max-w-[80%] mx-auto">
-        <Carousel
-          class="bg-secondary rounded-lg mb-4"
-          :opts="{ watchDrag: false }"
-          @init-api="setApi"
-        >
-          <CarouselContent>
-            <CarouselItem
-              v-for="card in set.cards"
-              :key="card.id" class="basis-full h-80 group"
-            >
-              <div class="relative h-full group-hover:[transform:rotateY(180deg)] transition-transform [transition-delay:300ms] duration-500 [transform-style:preserve-3d]">
-                <div class="absolute inset-0 w-full h-full flex items-center justify-center [backface-visibility:hidden]">
-                  {{ card.term }}
-                </div>
-                <div class="absolute inset-0 w-full h-full flex items-center justify-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                  {{ card.def }}
-                </div>
-              </div>
-            </CarouselItem>
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-
-        <div class="text-center">
-          {{ current }}/{{ totalCount }}
+      <ScrollArea
+        v-if="isTesting"
+        class="relative h-[72lvh] border rounded-lg pb-4 pt-6 px-2"
+      >
+        <div class="absolute top-4 right-4 flex gap-2">
+          <Button
+            v-if="questions.length"
+            size="sm"
+            @click="submit"
+          >
+            submit
+          </Button>
+          <Button
+            variant="destructive" size="sm"
+            @click="cancel"
+          >
+            cancel
+          </Button>
         </div>
-      </div>
 
-      <Separator label="test" class="my-10" />
-      <Button @click="demo">
-        demo
-      </Button>
+        <ul v-if="questions.length" class="grid gap-10 px-2 max-w-[80%]">
+          <li
+            v-for="(question, i) in questions"
+            :key="i"
+          >
+            <QuestionFillBlank
+              v-if="question.type === 'fill_blank'"
+              ref="questionRefs"
+              :question="question" :nth="i + 1"
+            />
+            <QuestionMultipleChoice
+              v-if="question.type === 'multiple_choice'"
+              ref="questionRefs"
+              :question="question" :nth="i + 1"
+            />
+            <QuestionTrueFalse
+              v-if="question.type === 'true_false'"
+              ref="questionRefs"
+              :question="question" :nth="i + 1"
+            />
+          </li>
+        </ul>
+        <div
+          v-else
+          class="absolute inset-0 flex items-center justify-center"
+        >
+          <div class="animate-spin">
+            <Disc3 class="size-16 stroke-1" />
+          </div>
+        </div>
+      </ScrollArea>
+
+      <template v-else>
+        <div class="max-w-[80%] mx-auto">
+          <Carousel
+            class="bg-secondary rounded-lg mb-4"
+            :opts="{ watchDrag: false }"
+            @init-api="setApi"
+          >
+            <CarouselContent>
+              <CarouselItem
+                v-for="card in set.cards"
+                :key="card.id" class="basis-full h-80 group"
+              >
+                <div class="relative h-full group-hover:[transform:rotateY(180deg)] transition-transform [transition-delay:300ms] duration-500 [transform-style:preserve-3d]">
+                  <div class="absolute inset-0 w-full h-full flex items-center justify-center [backface-visibility:hidden]">
+                    {{ card.term }}
+                  </div>
+                  <div class="absolute inset-0 w-full h-full flex items-center justify-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                    {{ card.def }}
+                  </div>
+                </div>
+              </CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+
+          <div class="text-center text-sm">
+            {{ current }}/{{ totalCount }}
+          </div>
+        </div>
+
+        <div class="flex justify-center mt-4">
+          <Button size="xs" @click="test">
+            generate tests
+          </Button>
+        </div>
+      </template>
     </div>
   </BasePageWrap>
 </template>
