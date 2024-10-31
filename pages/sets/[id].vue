@@ -5,7 +5,7 @@ import QuestionMultipleChoice from '~/components/question/QuestionMultipleChoice
 import QuestionTrueFalse from '~/components/question/QuestionTrueFalse.vue'
 import type { CarouselApi } from '~/components/ui/carousel'
 import type { Set } from '~/db'
-import type { Question } from '~/utils/types'
+import type { Question, QuestionAnswer } from '~/utils/types'
 
 const route = useRoute('sets-id')
 const setId = route.params.id
@@ -33,8 +33,15 @@ watch(api, (api) => {
 
 const isTesting = ref(false)
 
-const questions = ref<Question[]>([])
-async function test() {
+const questions = shallowRef<Question[]>([])
+const questionRefs = ref<(
+  InstanceType<typeof QuestionFillBlank>
+  | InstanceType<typeof QuestionMultipleChoice>
+  | InstanceType<typeof QuestionTrueFalse>
+)[]>([])
+const answers = ref<QuestionAnswer[]>([])
+
+async function generate() {
   if (!set.value)
     return
 
@@ -50,7 +57,16 @@ generate a JSON object with a "questions" key containing an array of questions i
 
 Make sure questions are directly based on the flashcard content, clear, and formatted in plain text without any HTML, markup, or special formatting. Each question type should appear at least twice.`, { format: 'json' })
 
-  questions.value = JSON.parse(response).questions
+  const _questions = JSON.parse(response).questions as Question[]
+  for (const q of _questions) {
+    if (q.type === 'fill_blank') {
+      q.question = q.question.replace(/_+/g, '[blank]')
+    }
+    else if (q.type === 'true_false') {
+      q.answer = `${q.answer}`.toLowerCase()
+    }
+  }
+  questions.value = _questions
   console.log(questions.value)
 }
 
@@ -59,16 +75,23 @@ function cancel() {
   isTesting.value = false
 }
 
-const questionRefs = ref<(
-  InstanceType<typeof QuestionFillBlank>
-  | InstanceType<typeof QuestionMultipleChoice>
-  | InstanceType<typeof QuestionTrueFalse>
-)[]>([])
-
 function submit() {
+  answers.value = []
   for (const q of questionRefs.value) {
-    console.log(q.validate())
+    answers.value.push(q.validate())
   }
+}
+
+async function ask(nth: number) {
+  const answer = answers.value[nth - 1]
+  if (answer.isTrue) {
+    return
+  }
+
+  const question = questions.value[nth - 1]
+  const response = await chat(`I answered "${answer.givenAnswer}" to question "${question.question}". Can you explain why this answer might be incorrect?`)
+
+  console.log(response)
 }
 </script>
 
@@ -100,7 +123,7 @@ function submit() {
 
       <ScrollArea
         v-if="isTesting"
-        class="relative h-[72lvh] border rounded-lg pb-4 pt-6 px-2"
+        class="relative h-[75lvh] border rounded-lg pb-4 pt-6 px-2"
       >
         <div class="absolute top-4 right-4 flex gap-2">
           <Button
@@ -127,16 +150,19 @@ function submit() {
               v-if="question.type === 'fill_blank'"
               ref="questionRefs"
               :question="question" :nth="i + 1"
+              @ask="ask"
             />
             <QuestionMultipleChoice
               v-if="question.type === 'multiple_choice'"
               ref="questionRefs"
               :question="question" :nth="i + 1"
+              @ask="ask"
             />
             <QuestionTrueFalse
               v-if="question.type === 'true_false'"
               ref="questionRefs"
               :question="question" :nth="i + 1"
+              @ask="ask"
             />
           </li>
         </ul>
@@ -182,7 +208,7 @@ function submit() {
         </div>
 
         <div class="flex justify-center mt-4">
-          <Button size="xs" @click="test">
+          <Button size="xs" @click="generate">
             generate tests
           </Button>
         </div>

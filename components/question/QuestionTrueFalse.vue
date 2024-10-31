@@ -1,20 +1,27 @@
 <script setup lang="ts">
-import type { Question } from '~/utils/types'
+import { Sparkle } from 'lucide-vue-next'
+import type { Question, QuestionAnswer } from '~/utils/types'
 
 const props = defineProps<{
   nth: number
   question: Extract<Question, { type: 'true_false' }>
 }>()
 
-const answer = ref<string>()
+const emit = defineEmits<{
+  ask: [nth: number ]
+}>()
 
-function validate() {
-  const isTrue = answer.value === props.question.answer
+const answer = ref<string>()
+const error = ref('')
+const isTrue = computed(() => answer.value?.toLowerCase() === props.question.answer.toLowerCase())
+
+function validate(): QuestionAnswer {
+  error.value = isTrue.value ? '' : 'Incorrect answer'
+
   return {
     nth: props.nth,
-    isTrue,
+    isTrue: isTrue.value,
     givenAnswer: answer.value,
-    correctAnswer: props.question.answer,
   }
 }
 
@@ -39,5 +46,14 @@ defineExpose({ validate })
         <Label :for="`question_${props.nth}_false`">false</Label>
       </div>
     </RadioGroup>
+    <div v-if="error" class="flex items-center mt-1 gap-2">
+      <span class="text-destructive">{{ error }}</span>
+      <Button
+        size="xs" variant="outline"
+        @click="emit('ask', props.nth)"
+      >
+        <Sparkle class="mr-1 size-3" /> ask
+      </Button>
+    </div>
   </div>
 </template>

@@ -12,3 +12,9 @@ export type Question = {
   question: string
   answer: string
 }
+
+export interface QuestionAnswer {
+  nth: number
+  isTrue: boolean
+  givenAnswer: string | undefined
+}

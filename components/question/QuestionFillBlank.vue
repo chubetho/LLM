@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Question } from '~/utils/types'
+import { Sparkle } from 'lucide-vue-next'
+import type { Question, QuestionAnswer } from '~/utils/types'
 import Input from '../ui/input/Input.vue'
 
 const props = defineProps<{
@@ -7,10 +8,15 @@ const props = defineProps<{
   question: Extract<Question, { type: 'fill_blank' }>
 }>()
 
+const emit = defineEmits<{
+  ask: [nth: number ]
+}>()
+
 const id = computed(() => `question_${props.nth}_input`)
+const error = ref('')
 
 const showQuestion = computed(() => {
-  const parts = props.question.question.replace(/_+/g, '[blank]').split('[blank]')
+  const parts = props.question.question.split('[blank]')
 
   return h('div', { class: 'flex items-center gap-1' }, [
     h('span', null, parts[0]),
@@ -19,17 +25,23 @@ const showQuestion = computed(() => {
   ])
 })
 
-function validate() {
+function validate(): QuestionAnswer {
   const el = document.getElementById(id.value) as HTMLInputElement
   if (!el) {
-    return { nth: props.nth, isTrue: false, answer: '' }
+    return {
+      nth: props.nth,
+      isTrue: false,
+      givenAnswer: '',
+    }
   }
+
+  const isTrue = el.value.toLowerCase() === props.question.answer.toLowerCase()
+  error.value = isTrue ? '' : 'Incorrect answer'
 
   return {
     nth: props.nth,
-    isTrue: el.value === props.question.answer,
+    isTrue,
     givenAnswer: el.value,
-    correctAnswer: props.question.answer,
   }
 }
 
@@ -42,5 +54,14 @@ defineExpose({ validate })
       question {{ props.nth }}:
     </div>
     <component :is="showQuestion" />
+    <div v-if="error" class="flex items-center mt-1 gap-2">
+      <span class="text-destructive">{{ error }}</span>
+      <Button
+        size="xs" variant="outline"
+        @click="emit('ask', props.nth)"
+      >
+        <Sparkle class="mr-1 size-3" /> ask
+      </Button>
+    </div>
   </div>
 </template>
