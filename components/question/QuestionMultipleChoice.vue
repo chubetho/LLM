@@ -11,16 +11,20 @@ const emit = defineEmits<{
   ask: [nth: number ]
 }>()
 
-const answer = ref<string>()
+const answer = ref('')
 const error = ref('')
-const isTrue = computed(() => answer.value?.toLowerCase() === props.question.answer.toLowerCase())
+
+watch(answer, () => {
+  error.value = ''
+})
 
 function validate(): QuestionAnswer {
-  error.value = isTrue.value ? '' : 'Incorrect answer'
+  const isTrue = answer.value?.toLowerCase() === props.question.answer.toLowerCase()
+  error.value = isTrue ? '' : 'Incorrect answer'
 
   return {
     nth: props.nth,
-    isTrue: isTrue.value,
+    isTrue,
     givenAnswer: answer.value,
   }
 }

@@ -13,6 +13,7 @@ const emit = defineEmits<{
 }>()
 
 const id = computed(() => `question_${props.nth}_input`)
+const answer = ref('')
 const error = ref('')
 
 const showQuestion = computed(() => {
@@ -20,28 +21,22 @@ const showQuestion = computed(() => {
 
   return h('div', { class: 'flex items-center gap-1' }, [
     h('span', null, parts[0]),
-    h(Input, { id: id.value, style: { width: `${props.question.answer.length * 2}ch` } }),
+    h(Input, { 'id': id.value, 'style': { width: `${props.question.answer.length * 2}ch` }, 'onUpdate:modelValue': (v) => {
+      answer.value = `${v}`
+      error.value = ''
+    } }),
     h('span', null, parts[1]),
   ])
 })
 
 function validate(): QuestionAnswer {
-  const el = document.getElementById(id.value) as HTMLInputElement
-  if (!el) {
-    return {
-      nth: props.nth,
-      isTrue: false,
-      givenAnswer: '',
-    }
-  }
-
-  const isTrue = el.value.toLowerCase() === props.question.answer.toLowerCase()
+  const isTrue = answer.value?.toLowerCase() === props.question.answer.toLowerCase()
   error.value = isTrue ? '' : 'Incorrect answer'
 
   return {
     nth: props.nth,
     isTrue,
-    givenAnswer: el.value,
+    givenAnswer: answer.value,
   }
 }
 

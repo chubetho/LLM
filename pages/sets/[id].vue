@@ -161,8 +161,8 @@ async function ask(nth: number) {
             <QuestionTrueFalse
               v-if="question.type === 'true_false'"
               ref="questionRefs"
-              :question="question" :nth="i + 1"
-              @ask="ask"
+              :question="question"
+              :nth="i + 1"
             />
           </li>
         </ul>
