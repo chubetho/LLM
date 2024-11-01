@@ -23,6 +23,7 @@ async function ask() {
     explain.value += o
   })
 }
+
 function validate(): QuestionAnswer {
   isTrue.value = check()
 
@@ -65,45 +66,31 @@ defineExpose({ validate })
         </PopoverContent>
       </Popover>
     </div>
+
     <div class="mb-2">
       {{ props.question.question }}
     </div>
     <RadioGroup v-model="answer" class="grid grid-cols-2 gap-3">
-      <div class="flex items-center space-x-2">
+      <div
+        v-for="(option, i) in ['true', 'false']"
+        :key="i"
+        class="flex items-center space-x-2"
+      >
         <RadioGroupItem
-          :id="`question_${props.nth}_true`" value="true"
+          :id="`question_${props.nth}_${i}`" :value="option"
           :class="{
-            'border-success text-success': isTrue === true && answer === 'true',
-            'border-destructive text-destructive': isTrue === false && answer === 'true',
-
+            'border-success text-success': isTrue === true && answer === option,
+            'border-destructive text-destructive': isTrue === false && answer === option,
           }"
         />
         <Label
-          :for="`question_${props.nth}_true`"
+          :for="`question_${props.nth}_${i}`"
           :class="{
-            'text-success': isTrue === true && answer === 'true',
-            'text-destructive': isTrue === false && answer === 'true',
+            'text-success': isTrue === true && answer === option,
+            'text-destructive': isTrue === false && answer === option,
           }"
         >
-          true
-        </Label>
-      </div>
-      <div class="flex items-center space-x-2">
-        <RadioGroupItem
-          :id="`question_${props.nth}_false`" value="false"
-          :class="{
-            'border-success text-success': isTrue === true && answer === 'false',
-            'border-destructive text-destructive': isTrue === false && answer === 'false',
-          }"
-        />
-        <Label
-          :for="`question_${props.nth}_false`"
-          :class="{
-            'text-success': isTrue === true && answer === 'false',
-            'text-destructive': isTrue === false && answer === 'false',
-          }"
-        >
-          false
+          {{ option }}
         </Label>
       </div>
     </RadioGroup>

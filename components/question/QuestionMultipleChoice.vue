@@ -7,26 +7,35 @@ const props = defineProps<{
   question: Extract<Question, { type: 'multiple_choice' }>
 }>()
 
-const emit = defineEmits<{
-  ask: [nth: number ]
-}>()
-
 const answer = ref('')
-const error = ref('')
+const isTrue = ref<boolean>()
+const explain = ref('')
 
 watch(answer, () => {
-  error.value = ''
+  isTrue.value = undefined
 })
 
+async function ask() {
+  if (explain.value)
+    return
+
+  await chatStream(`Explain briefly why the answer "${answer.value}" is ${check() ? 'correct' : 'incorrect'} for: ${props.question.question}.`, (o) => {
+    explain.value += o
+  })
+}
+
 function validate(): QuestionAnswer {
-  const isTrue = answer.value?.toLowerCase() === props.question.answer.toLowerCase()
-  error.value = isTrue ? '' : 'Incorrect answer'
+  isTrue.value = check()
 
   return {
     nth: props.nth,
-    isTrue,
+    isTrue: isTrue.value,
     givenAnswer: answer.value,
   }
+}
+
+function check() {
+  return answer.value.toLowerCase() === props.question.answer.toLowerCase()
 }
 
 defineExpose({ validate })
@@ -34,9 +43,30 @@ defineExpose({ validate })
 
 <template>
   <div>
-    <div class="mb-1 underline">
-      question {{ props.nth }}:
+    <div class="mb-1 flex items-end gap-4">
+      <span
+        class="underline" :class="{
+          'text-destructive': isTrue === false,
+          'text-success': isTrue === true,
+        }"
+      >
+        question {{ props.nth }}:
+      </span>
+      <Popover v-if="isTrue === false">
+        <PopoverTrigger as="div">
+          <Button
+            size="xs" variant="secondary"
+            @click="ask"
+          >
+            <Sparkle class="mr-1 size-3" /> ask
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent side="right" :side-offset="0">
+          {{ explain }}
+        </PopoverContent>
+      </Popover>
     </div>
+
     <div class="mb-2">
       {{ props.question.question }}
     </div>
@@ -46,20 +76,23 @@ defineExpose({ validate })
         :key="i"
         class="flex items-center space-x-2"
       >
-        <RadioGroupItem :id="`question_${props.nth}_${i}`" :value="option" />
-        <Label :for="`question_${props.nth}_${i}`">
+        <RadioGroupItem
+          :id="`question_${props.nth}_${i}`" :value="option"
+          :class="{
+            'border-success text-success': isTrue === true && answer === option,
+            'border-destructive text-destructive': isTrue === false && answer === option,
+          }"
+        />
+        <Label
+          :for="`question_${props.nth}_${i}`"
+          :class="{
+            'text-success': isTrue === true && answer === option,
+            'text-destructive': isTrue === false && answer === option,
+          }"
+        >
           {{ String.fromCharCode(97 + i) }}: {{ option }}
         </Label>
       </div>
     </RadioGroup>
-    <div v-if="error" class="flex items-center mt-1 gap-2">
-      <span class="text-destructive">{{ error }}</span>
-      <Button
-        size="xs" variant="outline"
-        @click="emit('ask', props.nth)"
-      >
-        <Sparkle class="mr-1 size-3" /> ask
-      </Button>
-    </div>
   </div>
 </template>

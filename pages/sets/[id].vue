@@ -65,6 +65,13 @@ Make sure questions are directly based on the flashcard content, clear, and form
     else if (q.type === 'true_false') {
       q.answer = `${q.answer}`.toLowerCase()
     }
+    else if (q.type === 'multiple_choice') {
+      const int = Number.parseInt(q.answer)
+      if (Number.isNaN(int))
+        continue
+
+      q.answer = q.options[int - 1] ?? q.options[0]
+    }
   }
   questions.value = _questions
   console.log(questions.value)

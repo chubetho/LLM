@@ -8,36 +8,47 @@ const props = defineProps<{
   question: Extract<Question, { type: 'fill_blank' }>
 }>()
 
-const emit = defineEmits<{
-  ask: [nth: number ]
-}>()
-
-const id = computed(() => `question_${props.nth}_input`)
 const answer = ref('')
-const error = ref('')
+const isTrue = ref<boolean>()
+const explain = ref('')
 
-const showQuestion = computed(() => {
+const comp = computed(() => {
   const parts = props.question.question.split('[blank]')
 
-  return h('div', { class: 'flex items-center gap-1' }, [
-    h('span', null, parts[0]),
-    h(Input, { 'id': id.value, 'style': { width: `${props.question.answer.length * 2}ch` }, 'onUpdate:modelValue': (v) => {
-      answer.value = `${v}`
-      error.value = ''
-    } }),
-    h('span', null, parts[1]),
+  return h('div', { class: `flex items-center gap-1 ${isTrue.value === true ? '[&>input]:border-success [&>input]:!ring-success' : ''}` }, [
+    h('span', { style: { whitespace: 'nowrap' } }, parts[0]),
+    h(Input, {
+      'style': { width: `${props.question.answer.length * 2}ch` },
+      'onUpdate:modelValue': (v) => {
+        answer.value = `${v}`
+        isTrue.value = undefined
+      },
+    }),
+    h('span', { style: { whitespace: 'nowrap' } }, parts[1]),
   ])
 })
 
+async function ask() {
+  if (explain.value)
+    return
+
+  await chatStream(`Explain briefly why the answer "${answer.value}" is ${check() ? 'correct' : 'incorrect'} for: ${props.question.question}.`, (o) => {
+    explain.value += o
+  })
+}
+
 function validate(): QuestionAnswer {
-  const isTrue = answer.value?.toLowerCase() === props.question.answer.toLowerCase()
-  error.value = isTrue ? '' : 'Incorrect answer'
+  isTrue.value = check()
 
   return {
     nth: props.nth,
-    isTrue,
+    isTrue: isTrue.value,
     givenAnswer: answer.value,
   }
+}
+
+function check() {
+  return answer.value.toLowerCase() === props.question.answer.toLowerCase()
 }
 
 defineExpose({ validate })
@@ -45,18 +56,30 @@ defineExpose({ validate })
 
 <template>
   <div>
-    <div class="mb-1 underline">
-      question {{ props.nth }}:
-    </div>
-    <component :is="showQuestion" />
-    <div v-if="error" class="flex items-center mt-1 gap-2">
-      <span class="text-destructive">{{ error }}</span>
-      <Button
-        size="xs" variant="outline"
-        @click="emit('ask', props.nth)"
+    <div class="mb-1 flex items-end gap-4">
+      <span
+        class="underline" :class="{
+          'text-destructive': isTrue === false,
+          'text-success': isTrue === true,
+        }"
       >
-        <Sparkle class="mr-1 size-3" /> ask
-      </Button>
+        question {{ props.nth }}:
+      </span>
+      <Popover v-if="isTrue === false">
+        <PopoverTrigger as="div">
+          <Button
+            size="xs" variant="secondary"
+            @click="ask"
+          >
+            <Sparkle class="mr-1 size-3" /> ask
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent side="right" :side-offset="0">
+          {{ explain }}
+        </PopoverContent>
+      </Popover>
     </div>
+
+    <component :is="comp" />
   </div>
 </template>
