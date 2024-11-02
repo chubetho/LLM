@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Disc3 } from 'lucide-vue-next'
+import { ArrowLeft, Disc3, Trash } from 'lucide-vue-next'
 import QuestionFillBlank from '~/components/question/QuestionFillBlank.vue'
 import QuestionMultipleChoice from '~/components/question/QuestionMultipleChoice.vue'
 import QuestionTrueFalse from '~/components/question/QuestionTrueFalse.vue'
@@ -100,16 +100,29 @@ async function ask(nth: number) {
 
   console.log(response)
 }
+
+const isDeleting = ref(false)
+async function deleteSet() {
+  await $fetch(`/api/sets/delete/${setId}`)
+  await navigateTo('/')
+}
 </script>
 
 <template>
   <BasePageWrap>
     <template #heading>
-      <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center justify-between">
         <NuxtLink to="/" class="inline-flex items-center gap-2 transition-transform hover:-translate-x-1">
           <ArrowLeft class="size-4" />
           <span>{{ set?.name ?? 'not found' }}</span>
         </NuxtLink>
+        <Button
+          variant="destructive" size="icon" class="w-8 h-8"
+          :disabled="isDeleting"
+          @click="deleteSet"
+        >
+          <Trash class="size-4" />
+        </Button>
       </div>
     </template>
 

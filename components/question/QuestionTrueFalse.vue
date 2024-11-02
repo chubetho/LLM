@@ -61,7 +61,7 @@ defineExpose({ validate })
             <Sparkle class="mr-1 size-3" /> ask
           </Button>
         </PopoverTrigger>
-        <PopoverContent side="right" :side-offset="0">
+        <PopoverContent side="right" :side-offset="10" class="w-96">
           {{ explain }}
         </PopoverContent>
       </Popover>

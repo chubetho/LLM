@@ -3,10 +3,6 @@ import { CirclePlus } from 'lucide-vue-next'
 import BasePageWrap from '~/components/BasePageWrap.vue'
 
 const { data: sets } = await useFetch('/api/sets')
-
-function insertSet() {
-  navigateTo('/insert')
-}
 </script>
 
 <template>
@@ -19,7 +15,7 @@ function insertSet() {
       <li>
         <Card
           class="group hover:border-primary transition-colors cursor-pointer h-full flex items-center justify-center"
-          @click="insertSet"
+          @click="navigateTo('/insert')"
         >
           <CirclePlus class="size-16 stroke-[0.5px] stroke-primary/60 group-hover:stroke-primary group-hover:stroke-[1px] transition-colors" />
         </Card>

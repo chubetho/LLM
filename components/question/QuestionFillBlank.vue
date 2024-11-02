@@ -15,7 +15,9 @@ const explain = ref('')
 const comp = computed(() => {
   const parts = props.question.question.split('[blank]')
 
-  return h('div', { class: `flex items-center gap-1 ${isTrue.value === true ? '[&>input]:border-success [&>input]:!ring-success' : ''}` }, [
+  return h('div', {
+    class: `flex items-center gap-1 ${isTrue.value === true ? '[&>input]:border-success [&>input]:!ring-success' : ''}`,
+  }, [
     h('span', { style: { whitespace: 'nowrap' } }, parts[0]),
     h(Input, {
       'style': { width: `${props.question.answer.length * 2}ch` },
@@ -74,7 +76,7 @@ defineExpose({ validate })
             <Sparkle class="mr-1 size-3" /> ask
           </Button>
         </PopoverTrigger>
-        <PopoverContent side="right" :side-offset="0">
+        <PopoverContent side="right" :side-offset="10" class="w-96">
           {{ explain }}
         </PopoverContent>
       </Popover>
