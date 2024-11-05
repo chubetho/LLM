@@ -3,6 +3,7 @@ import { ArrowLeft, Loader, Pen, Plus, Sparkle, Trash2 } from 'lucide-vue-next'
 import type { NewSet } from '~/db'
 
 type Card = NewSet['cards'][0]
+const setFromYt = useState<{ title: string, cards: (Omit<Card, 'id'>)[] }>('set_from_yt')
 
 const id = ref(1)
 const set = ref<NewSet>({
@@ -11,8 +12,22 @@ const set = ref<NewSet>({
   tags: [],
   createAt: useDateFormat(new Date(), 'YYYY-MM-DD').value,
 })
-appendCardManually()
-appendCardManually()
+
+if (setFromYt.value) {
+  console.log(setFromYt.value)
+  set.value.name = setFromYt.value.title
+  for (const c of setFromYt.value.cards) {
+    set.value.cards.push({
+      id: id.value++,
+      term: c.term,
+      def: c.def,
+    })
+  }
+}
+else {
+  appendCardManually()
+  appendCardManually()
+}
 
 function appendCardManually() {
   set.value.cards.push({
@@ -80,7 +95,7 @@ async function createSet() {
 
   const { name, tags } = JSON.parse(response) as { name: string, tags: string[] }
 
-  _set.name = name.toLowerCase()
+  _set.name = set.value.name || name.toLowerCase()
   _set.tags = tags.map(t => t.split('').filter(_t => t !== '#').join(''))
 
   const lastInsertRowid = await $fetch('/api/sets/insert', {

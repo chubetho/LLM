@@ -37,4 +37,5 @@ export async function chatStream(input: string, cb: (o: string) => void, opt?: C
   for await (const part of response) {
     cb(part.message.content)
   }
+  cb('__end__')
 }

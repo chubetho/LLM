@@ -10,18 +10,18 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@vueuse/core": "^11.1.0",
+    "@vueuse/core": "^11.2.0",
     "better-sqlite3": "^11.5.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "drizzle-orm": "^0.35.3",
+    "drizzle-orm": "^0.36.0",
     "embla-carousel-vue": "^8.3.1",
-    "lucide-vue-next": "^0.453.0",
-    "nuxt": "^3.13.2",
+    "lucide-vue-next": "^0.454.0",
+    "nuxt": "^3.14.0",
     "ollama": "^0.5.9",
     "pdf-parse": "^1.1.1",
-    "puppeteer": "^23.6.1",
-    "radix-vue": "^1.9.7",
+    "puppeteer": "^23.7.0",
+    "radix-vue": "^1.9.8",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul-vue": "^0.2.0",
@@ -30,16 +30,16 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.8.0",
-    "@nuxt/eslint": "^0.6.0",
+    "@nuxt/eslint": "^0.6.1",
     "@nuxt/fonts": "^0.10.2",
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@types/better-sqlite3": "^7.6.11",
     "@types/pdf-parse": "^1.1.4",
-    "@vueuse/nuxt": "^11.1.0",
-    "drizzle-kit": "^0.26.2",
+    "@vueuse/nuxt": "^11.2.0",
+    "drizzle-kit": "^0.27.1",
     "eslint-plugin-format": "^0.1.2",
-    "shadcn-nuxt": "^0.10.4"
+    "shadcn-nuxt": "^0.11.2"
   },
   "pnpm": {
     "patchedDependencies": {

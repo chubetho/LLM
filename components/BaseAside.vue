@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Bot, Layers, MessageSquare, Moon, Sun } from 'lucide-vue-next'
+import { Layers, MessageSquare, Moon, Sun, Youtube } from 'lucide-vue-next'
 
 const colorMode = useColorMode()
 
@@ -36,6 +36,15 @@ function toggleColorMode() {
           size="icon"
         >
           <MessageSquare class="size-5" />
+        </Button>
+      </NuxtLink>
+
+      <NuxtLink to="/youtube" active-class="[&>button]:bg-muted">
+        <Button
+          variant="ghost"
+          size="icon"
+        >
+          <Youtube class="size-5" />
         </Button>
       </NuxtLink>
     </nav>
