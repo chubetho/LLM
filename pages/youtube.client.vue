@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Loader } from 'lucide-vue-next'
+import { Loader, Youtube } from 'lucide-vue-next'
 
-const url = ref('https://www.youtube.com/watch?v=OjuYFNR1aWo')
+const url = ref('')
 
 const imgUrl = computed(() => {
   const parsed = URL.parse(url.value)
@@ -48,7 +48,7 @@ watch(data, (v) => {
     }
 
     output.value += o
-  })
+  }, { endSymbol: true })
 })
 
 const isGenerating = ref(false)
@@ -122,8 +122,13 @@ async function generateSet() {
           </div>
         </div>
 
-        <div class="border col-span-2">
-          <img :src="imgUrl" alt="thumbnail">
+        <div class="border col-span-2 rounded-lg overflow-hidden">
+          <AspectRatio :ratio="16 / 9">
+            <img v-if="imgUrl" :src="imgUrl" alt="thumbnail">
+            <div v-else class="w-full h-full bg-secondary flex items-center justify-center">
+              <Youtube class="size-16 stroke-1" />
+            </div>
+          </AspectRatio>
         </div>
       </div>
 

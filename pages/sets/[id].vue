@@ -103,8 +103,10 @@ async function ask(nth: number) {
 
 const isDeleting = ref(false)
 async function deleteSet() {
+  isDeleting.value = true
   await $fetch(`/api/sets/delete/${setId}`)
   await navigateTo('/')
+  isDeleting.value = false
 }
 </script>
 
@@ -127,25 +129,22 @@ async function deleteSet() {
     </template>
 
     <div v-if="set">
-      <div class="flex items-center gap-1 mb-6">
-        <span>tags: </span>
-        <ul class="flex flex-wrap gap-1">
-          <li
-            v-for="tag in set.tags"
-            :key="tag"
-          >
-            <Badge variant="secondary">
-              {{ tag }}
-            </Badge>
-          </li>
-        </ul>
-      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1 mb-6">
+          <span>tags: </span>
+          <ul class="flex flex-wrap gap-1">
+            <li
+              v-for="tag in set.tags"
+              :key="tag"
+            >
+              <Badge variant="secondary">
+                {{ tag }}
+              </Badge>
+            </li>
+          </ul>
+        </div>
 
-      <ScrollArea
-        v-if="isTesting"
-        class="relative h-[75lvh] border rounded-lg pb-4 pt-6 px-2"
-      >
-        <div class="absolute top-4 right-4 flex gap-2">
+        <div v-if="questions.length" class="flex gap-2">
           <Button
             v-if="questions.length"
             size="sm"
@@ -160,7 +159,12 @@ async function deleteSet() {
             cancel
           </Button>
         </div>
+      </div>
 
+      <div
+        v-if="isTesting"
+        class="relative pt-4"
+      >
         <ul v-if="questions.length" class="grid gap-10 px-2 max-w-[80%]">
           <li
             v-for="(question, i) in questions"
@@ -194,7 +198,7 @@ async function deleteSet() {
             <Disc3 class="size-16 stroke-1" />
           </div>
         </div>
-      </ScrollArea>
+      </div>
 
       <template v-else>
         <div class="max-w-[80%] mx-auto">
@@ -209,10 +213,10 @@ async function deleteSet() {
                 :key="card.id" class="basis-full h-80 group"
               >
                 <div class="relative h-full group-hover:[transform:rotateY(180deg)] transition-transform [transition-delay:300ms] duration-500 [transform-style:preserve-3d]">
-                  <div class="absolute inset-0 w-full h-full flex items-center justify-center [backface-visibility:hidden]">
+                  <div class="absolute inset-0 max-w-[80%] mx-auto w-full h-full flex items-center justify-center text-pretty text-center [backface-visibility:hidden]">
                     {{ card.term }}
                   </div>
-                  <div class="absolute inset-0 w-full h-full flex items-center justify-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <div class="absolute inset-0 max-w-[80%] mx-auto w-full h-full flex items-center justify-center text-pretty text-centers [backface-visibility:hidden] [transform:rotateY(180deg)]">
                     {{ card.def }}
                   </div>
                 </div>

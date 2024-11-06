@@ -2,6 +2,7 @@ import ollama from 'ollama'
 
 interface ChatOption {
   format?: 'json'
+  endSymbol?: boolean
 }
 
 export async function chat(input: string, opt?: ChatOption) {
@@ -25,7 +26,7 @@ export function abort() {
 export async function chatStream(input: string, cb: (o: string) => void, opt?: ChatOption) {
   ollama.abort()
 
-  const { format = undefined } = opt || {}
+  const { format = undefined, endSymbol } = opt || {}
 
   const response = await ollama.chat({
     model: 'llama3.1:8b',
@@ -37,5 +38,6 @@ export async function chatStream(input: string, cb: (o: string) => void, opt?: C
   for await (const part of response) {
     cb(part.message.content)
   }
-  cb('__end__')
+  if (endSymbol)
+    cb('__end__')
 }

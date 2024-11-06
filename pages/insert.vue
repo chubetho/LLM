@@ -137,67 +137,65 @@ async function createSet() {
             </template>
           </Button>
         </div>
-        <ScrollArea class="h-[80lvh] border rounded-lg pt-6 pb-24 pl-2 pr-1">
-          <ul class="grid gap-2 w-[calc(100%-1rem)]">
-            <li
-              v-for="(card, i) in set.cards"
-              :key="card.id"
-              class="flex items-start gap-4"
-            >
-              <p class="text-muted-foreground tracking-widest w-[5ch]">
-                #{{ i + 1 }}
-              </p>
-              <div class="relative grow grid grid-cols-2 gap-2">
-                <button
-                  class="absolute bottom-4 left-4 inline-flex ml-auto"
-                  @click="deleteCard(card.id)"
-                >
-                  <Trash2 class="size-4 text-destructive" />
-                </button>
-                <div class="grow p-4 bg-secondary rounded-lg">
-                  <Label :for="`input_${card.id}`" class="block mb-2">term</Label>
-                  <Input :id="`input_${card.id}`" v-model="card.term" placeholder="enter a value" />
-                </div>
-                <div class="relative grow p-4 bg-secondary rounded-lg">
-                  <button
-                    class="absolute top-3 right-4 group disabled:text-primary/50"
-                    :disabled="!card.term"
-                    @click="generateDef(card)"
-                  >
-                    <Sparkle class="size-4 animate-pulse group-disabled:animate-none" />
-                  </button>
-
-                  <Label :for="`textarea_${card.id}`" class="block mb-2">definition</Label>
-                  <Textarea :id="`textarea_${card.id}`" v-model="card.def" placeholder="enter a value" />
-                </div>
+        <ul class="grid gap-2">
+          <li
+            v-for="(card, i) in set.cards"
+            :key="card.id"
+            class="flex items-start gap-4"
+          >
+            <p class="text-muted-foreground tracking-widest w-[5ch]">
+              #{{ i + 1 }}
+            </p>
+            <div class="relative grow grid grid-cols-2 gap-2">
+              <button
+                class="absolute bottom-4 left-4 inline-flex ml-auto"
+                @click="deleteCard(card.id)"
+              >
+                <Trash2 class="size-4 text-destructive" />
+              </button>
+              <div class="grow p-4 bg-secondary rounded-lg">
+                <Label :for="`input_${card.id}`" class="block mb-2">term</Label>
+                <Input :id="`input_${card.id}`" v-model="card.term" placeholder="enter a value" />
               </div>
-            </li>
+              <div class="relative grow p-4 bg-secondary rounded-lg">
+                <button
+                  class="absolute top-3 right-4 group disabled:text-primary/50"
+                  :disabled="!card.term"
+                  @click="generateDef(card)"
+                >
+                  <Sparkle class="size-4 animate-pulse group-disabled:animate-none" />
+                </button>
 
-            <li class="flex items-center gap-4 pb-8">
-              <p class="text-muted-foreground tracking-widest w-[5ch]">
-                #{{ set.cards.length + 1 }}
-              </p>
-              <div class="grow grid grid-cols-2 gap-2">
-                <button
-                  v-if="canAddAutomatically"
-                  class="grow p-4 bg-secondary rounded-lg flex justify-center items-center gap-1 text-sm"
-                  @click="appendCardsAutomatically"
-                >
-                  <Sparkle class="size-4 animate-pulse" />
-                  add automatically
-                </button>
-                <button
-                  class="grow p-4 bg-secondary rounded-lg flex justify-center items-center gap-1 text-sm"
-                  :class="{ 'col-span-2': !canAddAutomatically }"
-                  @click="appendCardManually"
-                >
-                  <Plus class="size-4" />
-                  add manually
-                </button>
+                <Label :for="`textarea_${card.id}`" class="block mb-2">definition</Label>
+                <Textarea :id="`textarea_${card.id}`" v-model="card.def" placeholder="enter a value" />
               </div>
-            </li>
-          </ul>
-        </ScrollArea>
+            </div>
+          </li>
+
+          <li class="flex items-center gap-4 pb-8">
+            <p class="text-muted-foreground tracking-widest w-[5ch]">
+              #{{ set.cards.length + 1 }}
+            </p>
+            <div class="grow grid grid-cols-2 gap-2">
+              <button
+                v-if="canAddAutomatically"
+                class="grow p-4 bg-secondary rounded-lg flex justify-center items-center gap-1 text-sm"
+                @click="appendCardsAutomatically"
+              >
+                <Sparkle class="size-4 animate-pulse" />
+                add automatically
+              </button>
+              <button
+                class="grow p-4 bg-secondary rounded-lg flex justify-center items-center gap-1 text-sm"
+                :class="{ 'col-span-2': !canAddAutomatically }"
+                @click="appendCardManually"
+              >
+                <Plus class="size-4" />
+                add manually
+              </button>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </BasePageWrap>

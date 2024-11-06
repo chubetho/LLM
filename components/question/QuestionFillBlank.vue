@@ -16,10 +16,11 @@ const comp = computed(() => {
   const parts = props.question.question.split('[blank]')
 
   return h('div', {
-    class: `flex items-center gap-1 ${isTrue.value === true ? '[&>input]:border-success [&>input]:!ring-success' : ''}`,
+    class: `space-x ${isTrue.value === true ? '[&>input]:border-success [&>input]:!ring-success' : ''}`,
   }, [
     h('span', { style: { whitespace: 'nowrap' } }, parts[0]),
     h(Input, {
+      'class': 'inline h-8',
       'style': { width: `${props.question.answer.length * 2}ch` },
       'onUpdate:modelValue': (v) => {
         answer.value = `${v}`

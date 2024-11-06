@@ -8,8 +8,10 @@
       </div>
     </header>
 
-    <div class="h-full p-4">
-      <slot />
+    <div class="h-full p-4 pr-0">
+      <ScrollArea class="h-[80vh] pr-4 pb-8">
+        <slot />
+      </ScrollArea>
     </div>
   </div>
 </template>
