@@ -17,7 +17,7 @@
     "drizzle-orm": "^0.36.0",
     "embla-carousel-vue": "^8.3.1",
     "lucide-vue-next": "^0.454.0",
-    "nuxt": "^3.14.0",
+    "nuxt": "^3.14.159",
     "ollama": "^0.5.9",
     "pdf-parse": "^1.1.1",
     "puppeteer": "^23.7.0",
@@ -37,7 +37,7 @@
     "@types/better-sqlite3": "^7.6.11",
     "@types/pdf-parse": "^1.1.4",
     "@vueuse/nuxt": "^11.2.0",
-    "drizzle-kit": "^0.27.1",
+    "drizzle-kit": "^0.27.2",
     "eslint-plugin-format": "^0.1.2",
     "shadcn-nuxt": "^0.11.2"
   },

@@ -13,33 +13,28 @@ const imgUrl = computed(() => {
   return `https://i.ytimg.com/vi/${id}/hq720.jpg`
 })
 
-const { data, status, execute } = await useFetch('/api/youtube/transcripts', {
-  method: 'POST',
-  body: { url: url.value },
-  immediate: false,
-})
-
+const data = shallowRef<{ title: string, content: string }>()
 const isProcessing = ref(false)
+const canGenerateSet = ref(false)
 const output = ref('')
 
-function submit() {
+async function submit() {
   const isValid = URL.canParse(url.value)
   if (!isValid)
     return
 
   isProcessing.value = true
-  execute()
-}
-
-const canGenerateSet = ref(false)
-watch(data, (v) => {
-  if (!v || status.value !== 'success')
+  data.value = await $fetch('/api/youtube/transcripts', {
+    method: 'POST',
+    body: { url: url.value },
+  })
+  if (!data.value)
     return
 
   abort()
   output.value = ''
   chatStream(`Please summarize the following text in a clear and concise manner, maintaining the main points and critical information. Use proper formatting to organize the summary, with each key point or section on a new line. Include headings or bullet points where necessary, and use line breaks to ensure readability. Keep the tone informative and neutral. Aim for approximately 20% of the original text's length, unless otherwise specified.
-  ${v.content}`, (o) => {
+  ${data.value.content}`, (o) => {
     if (o === '__end__') {
       isProcessing.value = false
       output.value = output.value.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replaceAll('*', '')
@@ -49,7 +44,7 @@ watch(data, (v) => {
 
     output.value += o
   }, { endSymbol: true })
-})
+}
 
 const isGenerating = ref(false)
 async function generateSet() {

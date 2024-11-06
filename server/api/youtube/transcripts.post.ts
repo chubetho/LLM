@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     await page.goto(url, { waitUntil: 'networkidle2' })
 
     const titleSelector = '#title > h1 > yt-formatted-string'
-    const title = await page.$eval(titleSelector, el => el.textContent)
+    const title: string = await page.$eval(titleSelector, el => el.textContent)
 
     const btnSelector = `button[aria-label="Show transcript"]`
     await page.waitForSelector(btnSelector)
