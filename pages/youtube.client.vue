@@ -16,16 +16,15 @@ const imgUrl = computed(() => {
 
 const data = shallowRef<{ title: string, content: string }>()
 const isProcessing = ref(false)
-const canGenerateSet = ref(false)
 const output = ref('')
 
-async function submit() {
+async function process() {
   const isValid = URL.canParse(url.value)
   if (!isValid)
     return
 
   isProcessing.value = true
-  data.value = await $fetch('/api/youtube/transcripts', {
+  data.value = await $fetch('/api/youtube', {
     method: 'POST',
     body: { url: url.value },
   })
@@ -42,7 +41,6 @@ async function submit() {
       if (outputText === '__end__') {
         isProcessing.value = false
         output.value = output.value.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replaceAll('*', '')
-        canGenerateSet.value = true
         return
       }
       output.value += outputText
@@ -68,6 +66,12 @@ async function generateSet() {
   useState('set_from_yt', () => ({ title: data.value?.title, cards: JSON.parse(response).cards }))
   navigateTo('/insert')
 }
+
+const isSaving = ref(false)
+async function saveDocument() {
+  isSaving.value = true
+  isSaving.value = false
+}
 </script>
 
 <template>
@@ -77,48 +81,40 @@ async function generateSet() {
     </template>
 
     <div>
-      <div class="p-4 grid grid-cols-5 gap-10" @submit.prevent="submit">
+      <div class="p-4 grid grid-cols-5 gap-10" @submit.prevent="process">
         <div class="col-span-3">
-          <Label class="mb-1" for="yt_url">url</Label>
-          <Input
-            id="yt_url"
-            v-model="url"
-            class="mb-2"
-            placeholder="https://www.youtube.com/watch?v=<id>"
-          />
+          <div class="space-y-10">
+            <div>
+              <Label class="mb-1" for="yt_url">url</Label>
 
-          <div class="flex item-center gap-2">
-            <Button
-              size="sm"
-              :disabled="isProcessing"
-              @click="submit"
-            >
-              <template v-if="isProcessing">
-                <div class="flex gap-1 items-center">
-                  <Loader class="animate-spin size-4" />
-                  processing
-                </div>
-              </template>
-              <template v-else>
-                process
-              </template>
-            </Button>
+              <Input
+                id="yt_url"
+                v-model="url"
+                class="mb-2"
+                placeholder="https://www.youtube.com/watch?v=<id>"
+              />
 
-            <Button
-              size="sm"
-              :disabled="!canGenerateSet || isGenerating"
-              @click="generateSet"
-            >
-              <template v-if="isGenerating">
-                <div class="flex gap-1 items-center">
-                  <Loader class="animate-spin size-4" />
-                  generating
-                </div>
-              </template>
-              <template v-else>
-                generate set
-              </template>
-            </Button>
+              <Button
+                size="sm"
+                :disabled="isProcessing"
+                @click="process"
+              >
+                <template v-if="isProcessing">
+                  <div class="flex gap-1 items-center">
+                    <Loader class="animate-spin size-4" />
+                    processing
+                  </div>
+                </template>
+                <template v-else>
+                  process video
+                </template>
+              </Button>
+            </div>
+
+            <div v-if="data?.title" class="border rounded-lg p-4 bg-secondary">
+              <Label class="mb-1">title</Label>
+              <p>{{ data?.title }}</p>
+            </div>
           </div>
         </div>
 
@@ -133,10 +129,45 @@ async function generateSet() {
       </div>
 
       <template v-if="output">
-        <Separator label="summary" class="mt-6 mb-10" />
+        <div
+          v-if="output && !isProcessing"
+          class="flex justify-center item-center gap-2 mt-4 mb-6"
+        >
+          <Button
+            size="sm"
+            :disabled="isGenerating"
+            @click="generateSet"
+          >
+            <template v-if="isGenerating">
+              <div class="flex gap-1 items-center">
+                <Loader class="animate-spin size-4" />
+                generating
+              </div>
+            </template>
+            <template v-else>
+              generate set
+            </template>
+          </Button>
+
+          <Button
+            size="sm"
+            :disabled="isSaving"
+            @click="saveDocument"
+          >
+            <template v-if="isGenerating">
+              <div class="flex gap-1 items-center">
+                <Loader class="animate-spin size-4" />
+                saving
+              </div>
+            </template>
+            <template v-else>
+              save document
+            </template>
+          </Button>
+        </div>
 
         <div class="border p-4 rounded-lg">
-          <div v-html="output" />
+          <p class="pb-8 text-pretty text-justify" v-html="output" />
         </div>
       </template>
     </div>

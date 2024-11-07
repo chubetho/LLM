@@ -14,7 +14,7 @@ const { data: sets } = await useFetch('/api/sets')
     <ul class="grid gap-3 grid-cols-4">
       <li>
         <Card
-          class="group hover:border-primary transition-colors cursor-pointer h-full flex items-center justify-center"
+          class="group hover:border-primary transition-colors cursor-pointer h-full flex items-center justify-center min-h-40"
           @click="navigateTo('/insert')"
         >
           <CirclePlus class="size-16 stroke-[0.5px] stroke-primary/60 group-hover:stroke-primary group-hover:stroke-[1px] transition-colors" />
