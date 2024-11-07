@@ -1,7 +1,4 @@
-import type { embeddings, sets } from './'
-
-export type Embedding = typeof embeddings.$inferSelect
-export type NewEmbedding = typeof embeddings.$inferInsert
+import type { sets } from './'
 
 export type Set = typeof sets.$inferSelect
 export type NewSet = typeof sets.$inferInsert

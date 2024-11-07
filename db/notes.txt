@@ -1,0 +1,5 @@
+create table documents(
+  id integer primary key AUTOINCREMENT NOT NULL,
+  contents text NOT NULL,
+  embedding blob check(vec_length(embedding)==768)
+) strict;

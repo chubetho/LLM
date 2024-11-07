@@ -1,31 +1,21 @@
-import { sqlite } from '~/db'
+import { db, sqlite } from '~/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { id, embedding } = body
 
-  // const columns = sqlite.prepare(`PRAGMA table_info(vec_docs)`).all()
-  // console.log(columns)
-
-  // // Print out each column's information
-  // columns.forEach((column) => {
-  //   console.log(`Column Name: ${column.name}, Type: ${column.type}, Not Null: ${column.notnull}, Default Value: ${column.dflt_value}`)
-  // })
-
-  // console.log(JSON.stringify(embedding))
-
-  // const stmt = sqlite.prepare(`INSERT INTO vec_docs (id, embedding) VALUES (${id}, vec_f32(${embedding}))`)
-  // stmt.run()
+  //   const script = `
+  //   INSERT INTO documents (contents, embedding) VALUES (?, vec_f32(?));
+  // `
+  //   const stmt = sqlite.prepare(script)
+  //   stmt.run(body.contents, JSON.stringify(body.embedding))
 
   const script = `
-    create table documents(
-      id integer primary key,
-      embedding float[4]
-        check(
-          typeof(embedding) == 'blob'
-          and vec_length(embedding) == 768
-        )
-    );
+    select
+      id,
+      vec_distance_cosine(embedding, ?) as distance
+    from documents
+    order by distance;
   `
-  sqlite.prepare(script).run()
+  const a = sqlite.prepare(script).all(JSON.stringify(body.embedding))
+  console.log(a)
 })
