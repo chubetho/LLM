@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as sqliteVec from 'sqlite-vec'
 import * as schema from './schema'
 
-const sqlite = new Database('./db/db.sqlite3', { fileMustExist: true })
+export const sqlite = new Database('./db/db.sqlite3', { fileMustExist: true })
 sqliteVec.load(sqlite)
 
 // @ts-expect-error no type on sqlite-vec
