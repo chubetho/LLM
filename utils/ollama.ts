@@ -48,5 +48,8 @@ export async function embed(input: string) {
     input,
   })
 
-  return response.embeddings
+  if (response.embeddings.length > 1)
+    throw new Error('expect length = 1')
+
+  return new Float32Array(response.embeddings[0])
 }

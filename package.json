@@ -22,6 +22,7 @@
     "pdf-parse": "^1.1.1",
     "puppeteer": "^23.7.0",
     "radix-vue": "^1.9.8",
+    "sqlite-vec": "0.1.4-alpha.2",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul-vue": "^0.2.0",
