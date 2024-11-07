@@ -41,3 +41,12 @@ export async function chatStream(input: string, cb: (o: string) => void, opt?: C
   if (endSymbol)
     cb('__end__')
 }
+
+export async function embed(input: string) {
+  const response = await ollama.embed({
+    model: 'nomic-embed-text',
+    input,
+  })
+
+  return response.embeddings
+}

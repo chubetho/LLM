@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Layers, MessageSquare, Moon, Sun, Youtube } from 'lucide-vue-next'
+import { Bug, Layers, MessageSquare, Moon, Sun, Youtube } from 'lucide-vue-next'
 
 const colorMode = useColorMode()
 
@@ -20,6 +20,7 @@ function toggleColorMode() {
         <Sun v-if="colorMode.preference === 'light'" class="size-5" />
       </Button>
     </div>
+
     <nav class="flex flex-col h-full gap-2 p-2">
       <NuxtLink to="/" active-class="[&>button]:bg-muted">
         <Button
@@ -47,6 +48,17 @@ function toggleColorMode() {
           <Youtube class="size-5" />
         </Button>
       </NuxtLink>
+
+      <DevOnly>
+        <NuxtLink to="/debug" active-class="[&>button]:bg-muted">
+          <Button
+            variant="ghost"
+            size="icon"
+          >
+            <Bug class="size-5" />
+          </Button>
+        </NuxtLink>
+      </DevOnly>
     </nav>
   </aside>
 </template>

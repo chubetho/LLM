@@ -10,18 +10,21 @@ const props = defineProps<{
 const answer = ref('')
 const isTrue = ref<boolean>()
 const explain = ref('')
+const isExplained = ref(false)
 
 watch(answer, () => {
   isTrue.value = undefined
+  isExplained.value = false
 })
 
 async function ask() {
-  if (explain.value)
+  if (isExplained.value)
     return
 
   await chatStream(`Explain briefly why the answer "${answer.value}" is ${check() ? 'correct' : 'incorrect'} for: ${props.question.question}.`, (o) => {
     explain.value += o
   })
+  isExplained.value = true
 }
 
 function validate(): QuestionAnswer {
@@ -52,7 +55,7 @@ defineExpose({ validate })
       >
         question {{ props.nth }}:
       </span>
-      <Popover v-if="isTrue === false">
+      <Popover v-if="isTrue !== undefined">
         <PopoverTrigger as="div">
           <Button
             size="xs" variant="secondary"

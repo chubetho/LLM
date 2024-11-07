@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Disc3, Trash } from 'lucide-vue-next'
+import { ArrowLeft, Loader, Trash } from 'lucide-vue-next'
 import QuestionFillBlank from '~/components/question/QuestionFillBlank.vue'
 import QuestionMultipleChoice from '~/components/question/QuestionMultipleChoice.vue'
 import QuestionTrueFalse from '~/components/question/QuestionTrueFalse.vue'
@@ -80,6 +80,7 @@ Make sure questions are directly based on the flashcard content, clear, and form
 function cancel() {
   abort()
   isTesting.value = false
+  questions.value = []
 }
 
 function submit() {
@@ -144,7 +145,7 @@ async function deleteSet() {
           </ul>
         </div>
 
-        <div v-if="questions.length" class="flex gap-2">
+        <div v-if="isTesting" class="flex gap-2">
           <Button
             v-if="questions.length"
             size="sm"
@@ -192,10 +193,10 @@ async function deleteSet() {
         </ul>
         <div
           v-else
-          class="absolute inset-0 flex items-center justify-center"
+          class="flex items-center justify-center h-[50lvh]"
         >
           <div class="animate-spin">
-            <Disc3 class="size-16 stroke-1" />
+            <Loader class="size-12 stroke-1" />
           </div>
         </div>
       </div>

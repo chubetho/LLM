@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Loader, Youtube } from 'lucide-vue-next'
+import Separator from '~/components/ui/separator/Separator.vue'
 
 const url = ref('')
 
@@ -32,18 +33,22 @@ async function submit() {
     return
 
   abort()
-  output.value = ''
-  chatStream(`Please summarize the following text in a clear and concise manner, maintaining the main points and critical information. Use proper formatting to organize the summary, with each key point or section on a new line. Include headings or bullet points where necessary, and use line breaks to ensure readability. Keep the tone informative and neutral. Aim for approximately 20% of the original text's length, unless otherwise specified.
-  ${data.value.content}`, (o) => {
-    if (o === '__end__') {
-      isProcessing.value = false
-      output.value = output.value.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replaceAll('*', '')
-      canGenerateSet.value = true
-      return
-    }
 
-    output.value += o
-  }, { endSymbol: true })
+  output.value = ''
+  chatStream(
+    `Please summarize the following text in a clear and concise manner, focusing on the main points and critical information. Keep the tone informative and neutral. Aim for approximately 20% of the original text's length, unless otherwise specified. Use proper formatting to organize the summary, with each key point or section on a new line. Include headings or bullet points where necessary, and use line breaks to ensure readability:
+  ${data.value.content}`,
+    (outputText) => {
+      if (outputText === '__end__') {
+        isProcessing.value = false
+        output.value = output.value.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replaceAll('*', '')
+        canGenerateSet.value = true
+        return
+      }
+      output.value += outputText
+    },
+    { endSymbol: true },
+  )
 }
 
 const isGenerating = ref(false)
@@ -121,13 +126,19 @@ async function generateSet() {
           <AspectRatio :ratio="16 / 9">
             <img v-if="imgUrl" :src="imgUrl" alt="thumbnail">
             <div v-else class="w-full h-full bg-secondary flex items-center justify-center">
-              <Youtube class="size-16 stroke-1" />
+              <Youtube class="size-16 stroke-1 opacity-80" />
             </div>
           </AspectRatio>
         </div>
       </div>
 
-      <div v-html="output" />
+      <template v-if="output">
+        <Separator label="summary" class="mt-6 mb-10" />
+
+        <div class="border p-4 rounded-lg">
+          <div v-html="output" />
+        </div>
+      </template>
     </div>
   </BasePageWrap>
 </template>
