@@ -15,6 +15,13 @@
       "when": 1731081304979,
       "tag": "0001_thin_namora",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1731083504873,
+      "tag": "0002_outgoing_sharon_carter",
+      "breakpoints": true
     }
   ]
 }

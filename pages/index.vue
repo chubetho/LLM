@@ -1,8 +1,23 @@
 <script setup lang="ts">
 import { CirclePlus } from 'lucide-vue-next'
-import BasePageWrap from '~/components/BasePageWrap.vue'
 
 const { data: sets } = await useFetch('/api/sets')
+const search = ref('')
+const searchDebounced = debouncedRef(search, 500)
+
+const { data: foundSets } = await useAsyncData('search', async () => {
+  const embedding = await embed(searchDebounced.value)
+  return $fetch('/api/sets/find', {
+    method: 'POST',
+    body: { embedding },
+  })
+}, {
+  deep: false,
+  lazy: true,
+  watch: [searchDebounced],
+})
+
+const showSets = computed(() => foundSets.value || sets.value)
 </script>
 
 <template>
@@ -13,7 +28,7 @@ const { data: sets } = await useFetch('/api/sets')
 
     <div class="space-y-4 p-1">
       <div class="">
-        <Input placeholder="search anything..." />
+        <Input v-model="search" placeholder="search anything..." />
       </div>
 
       <ul class="grid gap-3 grid-cols-4">
@@ -25,8 +40,8 @@ const { data: sets } = await useFetch('/api/sets')
             <CirclePlus class="size-16 stroke-[0.5px] stroke-primary/60 group-hover:stroke-primary group-hover:stroke-[1px] transition-colors" />
           </Card>
         </li>
-        <template v-if="sets">
-          <li v-for="set in sets" :key="set.id">
+        <template v-if="showSets">
+          <li v-for="set in showSets" :key="set.id">
             <NuxtLink class="group" :to="`/sets/${set.id}`">
               <Card class="group-hover:border-primary transition-colors h-full flex flex-col">
                 <CardHeader>
@@ -34,7 +49,7 @@ const { data: sets } = await useFetch('/api/sets')
                 </CardHeader>
                 <CardContent>
                   <ul class="flex flex-wrap gap-1 pb-3">
-                    <li v-for="tag in set.tags" :key="tag">
+                    <li v-for="tag in (typeof set.tags === 'string' ? JSON.parse(set.tags) as string[] : set.tags)" :key="tag">
                       <Badge variant="secondary">
                         {{ tag }}
                       </Badge>

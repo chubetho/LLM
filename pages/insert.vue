@@ -10,6 +10,7 @@ const set = ref<NewSet>({
   name: '',
   cards: [],
   tags: [],
+  embedding: undefined,
   createAt: useDateFormat(new Date(), 'YYYY-MM-DD').value,
 })
 
@@ -40,10 +41,12 @@ function appendCardManually() {
 const canAddAutomatically = computed(() => {
   return set.value.cards.some(c => c.term?.length > 5 && c.def?.length > 5)
 })
+const isAppending = ref(false)
 async function appendCardsAutomatically() {
   if (!canAddAutomatically.value)
     return
 
+  isAppending.value = true
   const response = await chat(
     `Using these input cards as a reference: ${JSON.stringify(set.value.cards)}, generate additional, meaningful cards in JSON format as an array of objects with {term: string, def: string}. The new cards should follow the same structure and type of content but are not limited to topics mentioned in the input cards. Exclude the "id" property and ensure each new card is unique.`,
     { format: 'json' },
@@ -62,6 +65,7 @@ async function appendCardsAutomatically() {
   }
 
   set.value.cards = set.value.cards.filter(c => c.def && c.term)
+  isAppending.value = false
 }
 
 function deleteCard(id: number) {
@@ -72,7 +76,7 @@ async function generateDef(c: Card) {
   if (!c.term)
     return
   c.def = ''
-  await chatStream(`Provide a brief, main-content definition for the term "${c.term}". Keep it concise.`, (output) => {
+  await chatStream(`Provide a short, main-content definition for the term "${c.term}". Keep it concise.`, (output) => {
     c.def += output
   })
 }
@@ -97,6 +101,7 @@ async function createSet() {
 
   _set.name = set.value.name || name.toLowerCase()
   _set.tags = tags.map(t => t.split('').filter(_t => t !== '#').join(''))
+  _set.embedding = await embed(JSON.stringify(_set))
 
   const lastInsertRowid = await $fetch('/api/sets/insert', {
     method: 'POST',
@@ -179,11 +184,18 @@ async function createSet() {
             <div class="grow grid grid-cols-2 gap-2">
               <button
                 v-if="canAddAutomatically"
-                class="grow p-4 bg-secondary rounded-lg flex justify-center items-center gap-1 text-sm"
+                class="grow p-4 bg-secondary rounded-lg flex justify-center items-center gap-1 text-sm disabled:opacity-50"
+                :disabled="!canAddAutomatically || isAppending"
                 @click="appendCardsAutomatically"
               >
-                <Sparkle class="size-4 animate-pulse" />
-                add automatically
+                <template v-if="isAppending">
+                  <Loader class="size-4 animate-spin" />
+                  generating
+                </template>
+                <template v-else>
+                  <Sparkle class="size-4 animate-pulse" />
+                  add automatically
+                </template>
               </button>
               <button
                 class="grow p-4 bg-secondary rounded-lg flex justify-center items-center gap-1 text-sm"
