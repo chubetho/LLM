@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Loader, Youtube } from 'lucide-vue-next'
-import Separator from '~/components/ui/separator/Separator.vue'
 
 const url = ref('')
 
@@ -15,15 +14,16 @@ const imgUrl = computed(() => {
 })
 
 const data = shallowRef<{ title: string, content: string }>()
-const isProcessing = ref(false)
+const processState = ref<'unprocess' | 'processing' | 'processed'>('unprocess')
 const output = ref('')
+const outputEl = ref<HTMLElement>()
 
 async function process() {
   const isValid = URL.canParse(url.value)
   if (!isValid)
     return
 
-  isProcessing.value = true
+  processState.value = 'processing'
   data.value = await $fetch('/api/youtube', {
     method: 'POST',
     body: { url: url.value },
@@ -39,7 +39,8 @@ async function process() {
   ${data.value.content}`,
     (outputText) => {
       if (outputText === '__end__') {
-        isProcessing.value = false
+        processState.value = 'processed'
+
         output.value = output.value.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replaceAll('*', '')
         return
       }
@@ -67,10 +68,25 @@ async function generateSet() {
   navigateTo('/insert')
 }
 
-const isSaving = ref(false)
+const savingState = ref<'unsave' | 'saving' | 'saved'>('unsave')
 async function saveDocument() {
-  isSaving.value = true
-  isSaving.value = false
+  const textContent = outputEl.value?.textContent
+  if (!textContent)
+    return
+
+  savingState.value = 'saving'
+
+  const embedding = await embed(textContent)
+
+  await $fetch('/api/docs', {
+    method: 'POST',
+    body: {
+      contents: textContent,
+      embedding,
+    },
+  })
+
+  savingState.value = 'saved'
 }
 </script>
 
@@ -96,17 +112,20 @@ async function saveDocument() {
 
               <Button
                 size="sm"
-                :disabled="isProcessing"
+                :disabled="processState === 'processed' || processState === 'processing'"
                 @click="process"
               >
-                <template v-if="isProcessing">
+                <template v-if="processState === 'processing'">
                   <div class="flex gap-1 items-center">
                     <Loader class="animate-spin size-4" />
                     processing
                   </div>
                 </template>
-                <template v-else>
+                <template v-else-if="processState === 'unprocess'">
                   process video
+                </template>
+                <template v-else>
+                  video processed
                 </template>
               </Button>
             </div>
@@ -129,13 +148,10 @@ async function saveDocument() {
       </div>
 
       <template v-if="output">
-        <div
-          v-if="output && !isProcessing"
-          class="flex justify-center item-center gap-2 mt-4 mb-6"
-        >
+        <div class="flex justify-center item-center gap-2 mt-4 mb-4">
           <Button
             size="sm"
-            :disabled="isGenerating"
+            :disabled="processState === 'processing' || isGenerating"
             @click="generateSet"
           >
             <template v-if="isGenerating">
@@ -151,23 +167,28 @@ async function saveDocument() {
 
           <Button
             size="sm"
-            :disabled="isSaving"
+            :disabled="processState === 'processing' || savingState === 'saved' || savingState === 'saving'"
             @click="saveDocument"
           >
-            <template v-if="isGenerating">
+            <template v-if="savingState === 'saving'">
               <div class="flex gap-1 items-center">
                 <Loader class="animate-spin size-4" />
                 saving
               </div>
             </template>
-            <template v-else>
+            <template v-else-if="savingState === 'unsave'">
               save document
+            </template>
+            <template v-else>
+              document saved
             </template>
           </Button>
         </div>
 
-        <div class="border p-4 rounded-lg">
-          <p class="pb-8 text-pretty text-justify" v-html="output" />
+        <div class="p-4">
+          <div class="p-4 border rounded-lg">
+            <p ref="outputEl" class="pb-8 text-pretty text-justify" v-html="output" />
+          </div>
         </div>
       </template>
     </div>

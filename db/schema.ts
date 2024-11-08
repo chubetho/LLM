@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { blob, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const documents = sqliteTable('documents', {
@@ -9,7 +10,7 @@ export const documents = sqliteTable('documents', {
 export const sets = sqliteTable('sets', {
   id: integer().primaryKey({ autoIncrement: true }).notNull(),
   name: text().notNull(),
-  cards: text().notNull(),
-  tags: text(),
+  cards: text({ mode: 'json' }).$type<{ id: number, term: string, def: string }[]>().notNull(),
+  tags: text({ mode: 'json' }).$type<string[]>().notNull(),
   createAt: text().notNull(),
 })

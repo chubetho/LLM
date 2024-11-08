@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ArrowLeft, Loader, Pen, Plus, Sparkle, Trash2 } from 'lucide-vue-next'
+import { ArrowLeft, Loader, Pen, Plus, Sparkle, Trash } from 'lucide-vue-next'
 import type { NewSet } from '~/db'
 
-type Card = NewSet['cards'][0]
+type Card = NonNullable<NewSet['cards']>[0]
 const setFromYt = useState<{ title: string, cards: (Omit<Card, 'id'>)[] }>('set_from_yt')
 
 const id = ref(1)
@@ -129,8 +129,8 @@ async function createSet() {
             @click="createSet"
           >
             <div v-if="isCreating" class="flex gap-1 items-center">
-              creating
               <Loader class="size-4 animate-spin" />
+              creating
             </div>
             <template v-else>
               create
@@ -141,21 +141,21 @@ async function createSet() {
           <li
             v-for="(card, i) in set.cards"
             :key="card.id"
-            class="flex items-start gap-4"
+            class="flex items-baseline gap-4"
           >
             <p class="text-muted-foreground tracking-widest w-[5ch]">
               #{{ i + 1 }}
             </p>
-            <div class="relative grow grid grid-cols-2 gap-2">
-              <button
-                class="absolute bottom-4 left-4 inline-flex ml-auto"
-                @click="deleteCard(card.id)"
-              >
-                <Trash2 class="size-4 text-destructive" />
-              </button>
-              <div class="grow p-4 bg-secondary rounded-lg">
-                <Label :for="`input_${card.id}`" class="block mb-2">term</Label>
-                <Input :id="`input_${card.id}`" v-model="card.term" placeholder="enter a value" />
+            <div class="grow grid grid-cols-2 gap-2">
+              <div class="relative grow p-4 bg-secondary rounded-lg">
+                <button
+                  class="absolute top-3 right-4"
+                  @click="deleteCard(card.id)"
+                >
+                  <Trash class="size-4 text-destructive fill-destructive" />
+                </button>
+                <Label :for="`textarea_term_${card.id}`" class="block mb-2">term</Label>
+                <Textarea :id="`textarea_term_${card.id}`" v-model="card.term" placeholder="enter a value" />
               </div>
               <div class="relative grow p-4 bg-secondary rounded-lg">
                 <button
@@ -166,8 +166,8 @@ async function createSet() {
                   <Sparkle class="size-4 animate-pulse group-disabled:animate-none" />
                 </button>
 
-                <Label :for="`textarea_${card.id}`" class="block mb-2">definition</Label>
-                <Textarea :id="`textarea_${card.id}`" v-model="card.def" placeholder="enter a value" />
+                <Label :for="`textarea_def_${card.id}`" class="block mb-2">definition</Label>
+                <Textarea :id="`textarea_def_${card.id}`" v-model="card.def" placeholder="enter a value" />
               </div>
             </div>
           </li>
