@@ -11,6 +11,6 @@ export default defineEventHandler(async (event) => {
     return result.text
   }
   catch {
-
+    return createError('cant read pdf.')
   }
 })

@@ -91,53 +91,40 @@ async function saveDocument() {
 </script>
 
 <template>
-  <BasePageWrap>
-    <template #heading>
-      summarize youtube video
-    </template>
+  <div>
+    <div class="space-y-8">
+      <div>
+        <Label class="mb-1" for="yt_url">youtube url</Label>
 
-    <div>
-      <div class="p-4 grid grid-cols-5 gap-10" @submit.prevent="process">
-        <div class="col-span-3">
-          <div class="space-y-10">
-            <div>
-              <Label class="mb-1" for="yt_url">url</Label>
+        <Input
+          id="yt_url"
+          v-model="url"
+          class="mb-2"
+          placeholder="https://www.youtube.com/watch?v=<id>"
+        />
 
-              <Input
-                id="yt_url"
-                v-model="url"
-                class="mb-2"
-                placeholder="https://www.youtube.com/watch?v=<id>"
-              />
-
-              <Button
-                size="sm"
-                :disabled="processState === 'processed' || processState === 'processing'"
-                @click="process"
-              >
-                <template v-if="processState === 'processing'">
-                  <div class="flex gap-1 items-center">
-                    <Loader class="animate-spin size-4" />
-                    processing
-                  </div>
-                </template>
-                <template v-else-if="processState === 'unprocess'">
-                  process video
-                </template>
-                <template v-else>
-                  video processed
-                </template>
-              </Button>
+        <Button
+          size="sm"
+          :disabled="processState === 'processed' || processState === 'processing'"
+          @click="process"
+        >
+          <template v-if="processState === 'processing'">
+            <div class="flex gap-1 items-center">
+              <Loader class="animate-spin size-4" />
+              processing
             </div>
+          </template>
+          <template v-else-if="processState === 'unprocess'">
+            process video
+          </template>
+          <template v-else>
+            video processed
+          </template>
+        </Button>
+      </div>
 
-            <div v-if="data?.title" class="border rounded-lg p-4 bg-secondary">
-              <Label class="mb-1">title</Label>
-              <p>{{ data?.title }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="border col-span-2 rounded-lg overflow-hidden">
+      <div v-if="data?.title" class="grid grid-cols-5 gap-4 bg-secondary p-4 rounded-lg">
+        <div class="rounded-lg overflow-hidden col-span-2">
           <AspectRatio :ratio="16 / 9">
             <img v-if="imgUrl" :src="imgUrl" alt="thumbnail">
             <div v-else class="w-full h-full bg-secondary flex items-center justify-center">
@@ -145,52 +132,60 @@ async function saveDocument() {
             </div>
           </AspectRatio>
         </div>
-      </div>
-
-      <template v-if="output">
-        <div class="flex justify-center item-center gap-2 mt-4 mb-4">
-          <Button
-            size="sm"
-            :disabled="processState === 'processing' || isGenerating"
-            @click="generateSet"
-          >
-            <template v-if="isGenerating">
-              <div class="flex gap-1 items-center">
-                <Loader class="animate-spin size-4" />
-                generating
-              </div>
-            </template>
-            <template v-else>
-              generate set
-            </template>
-          </Button>
-
-          <Button
-            size="sm"
-            :disabled="processState === 'processing' || savingState === 'saved' || savingState === 'saving'"
-            @click="saveDocument"
-          >
-            <template v-if="savingState === 'saving'">
-              <div class="flex gap-1 items-center">
-                <Loader class="animate-spin size-4" />
-                saving
-              </div>
-            </template>
-            <template v-else-if="savingState === 'unsave'">
-              save document
-            </template>
-            <template v-else>
-              document saved
-            </template>
-          </Button>
-        </div>
-
-        <div class="p-4">
-          <div class="p-4 border rounded-lg">
-            <p ref="outputEl" class="pb-8 text-pretty text-justify" v-html="output" />
+        <div class="col-span-3">
+          <p class="text-lg">
+            {{ data?.title }}
+          </p>
+          <div class="max-h-32 overflow-y-auto mt-4">
+            <p class="text-pretty text-justify pr-4">
+              {{ data.content }}
+            </p>
           </div>
         </div>
-      </template>
+      </div>
     </div>
-  </BasePageWrap>
+
+    <template v-if="output">
+      <div class="flex justify-center item-center gap-2 mt-4">
+        <Button
+          size="sm"
+          :disabled="processState === 'processing' || isGenerating"
+          @click="generateSet"
+        >
+          <template v-if="isGenerating">
+            <div class="flex gap-1 items-center">
+              <Loader class="animate-spin size-4" />
+              generating
+            </div>
+          </template>
+          <template v-else>
+            generate set
+          </template>
+        </Button>
+
+        <Button
+          size="sm"
+          :disabled="processState === 'processing' || savingState === 'saved' || savingState === 'saving'"
+          @click="saveDocument"
+        >
+          <template v-if="savingState === 'saving'">
+            <div class="flex gap-1 items-center">
+              <Loader class="animate-spin size-4" />
+              saving
+            </div>
+          </template>
+          <template v-else-if="savingState === 'unsave'">
+            save document
+          </template>
+          <template v-else>
+            document saved
+          </template>
+        </Button>
+      </div>
+
+      <div class="p-4 border rounded-lg">
+        <p ref="outputEl" class="pb-8 text-pretty text-justify" v-html="output" />
+      </div>
+    </template>
+  </div>
 </template>

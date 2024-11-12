@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Bug, Layers, MessageSquare, Moon, Sun, Youtube } from 'lucide-vue-next'
+import { Bug, FileText, Layers, MessageSquare, Moon, Sun, Youtube } from 'lucide-vue-next'
 
 const colorMode = useColorMode()
 
@@ -40,12 +40,12 @@ function toggleColorMode() {
         </Button>
       </NuxtLink>
 
-      <NuxtLink to="/youtube" active-class="[&>button]:bg-muted">
+      <NuxtLink to="/document" active-class="[&>button]:bg-muted">
         <Button
           variant="ghost"
           size="icon"
         >
-          <Youtube class="size-5" />
+          <FileText class="size-5" />
         </Button>
       </NuxtLink>
 
