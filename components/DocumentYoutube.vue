@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Loader, Youtube } from 'lucide-vue-next'
 
+const emit = defineEmits<{
+  parsed: [title: string, content: string]
+}>()
+
 const url = ref('')
 
 const imgUrl = computed(() => {
@@ -14,16 +18,16 @@ const imgUrl = computed(() => {
 })
 
 const data = shallowRef<{ title: string, content: string }>()
-const processState = ref<'unprocess' | 'processing' | 'processed'>('unprocess')
-const output = ref('')
-const outputEl = ref<HTMLElement>()
+const getStatus = useStatus()
+const infoEl = ref<HTMLElement>()
+const contentMaxHeight = ref(0)
 
-async function process() {
+async function parse() {
   const isValid = URL.canParse(url.value)
   if (!isValid)
     return
 
-  processState.value = 'processing'
+  getStatus.setStatus('running')
   data.value = await $fetch('/api/youtube', {
     method: 'POST',
     body: { url: url.value },
@@ -31,99 +35,55 @@ async function process() {
   if (!data.value)
     return
 
-  abort()
+  emit('parsed', data.value.title, data.value.content)
+  getStatus.setStatus('done')
 
-  output.value = ''
-  chatStream(
-    `Please summarize the following text in a clear and concise manner, focusing on the main points and critical information. Keep the tone informative and neutral. Aim for approximately 20% of the original text's length, unless otherwise specified. Use proper formatting to organize the summary, with each key point or section on a new line. Include headings or bullet points where necessary, and use line breaks to ensure readability:
-  ${data.value.content}`,
-    (outputText) => {
-      if (outputText === '__end__') {
-        processState.value = 'processed'
+  await nextTick(() => {
+    if (!infoEl.value)
+      return
 
-        output.value = output.value.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replaceAll('*', '')
-        return
-      }
-      output.value += outputText
-    },
-    { endSymbol: true },
-  )
-}
-
-const isGenerating = ref(false)
-async function generateSet() {
-  if (!output.value)
-    return
-
-  isGenerating.value = true
-
-  const response = await chat(
-    `Using this summary ${JSON.stringify(output.value)} to generate, meaningful cards in JSON format as an array of objects with {term: string, def: string}.  ensure each new card is unique.`,
-    { format: 'json' },
-  )
-
-  isGenerating.value = false
-
-  useState('set_from_yt', () => ({ title: data.value?.title, cards: JSON.parse(response).cards }))
-  navigateTo('/insert')
-}
-
-const savingState = ref<'unsave' | 'saving' | 'saved'>('unsave')
-async function saveDocument() {
-  const textContent = outputEl.value?.textContent
-  if (!textContent)
-    return
-
-  savingState.value = 'saving'
-
-  const embedding = await embed(textContent)
-
-  await $fetch('/api/docs', {
-    method: 'POST',
-    body: {
-      contents: textContent,
-      embedding,
-    },
+    const titleHeight = infoEl.value.querySelector('p')?.clientHeight ?? 0
+    contentMaxHeight.value = infoEl.value.clientHeight - titleHeight - 16
   })
-
-  savingState.value = 'saved'
 }
 </script>
 
 <template>
   <div>
     <div class="space-y-8">
-      <div>
-        <Label class="mb-1" for="yt_url">youtube url</Label>
+      <div class="flex items-end gap-2">
+        <div class="grow">
+          <Label for="yt_url" class="mb-1">youtube url</Label>
 
-        <Input
-          id="yt_url"
-          v-model="url"
-          class="mb-2"
-          placeholder="https://www.youtube.com/watch?v=<id>"
-        />
+          <Input
+            id="yt_url"
+            v-model="url"
+            class="h-9"
+            placeholder="https://www.youtube.com/watch?v=<id>"
+          />
+        </div>
 
         <Button
           size="sm"
-          :disabled="processState === 'processed' || processState === 'processing'"
-          @click="process"
+          :disabled="getStatus.status.value === 'done' || getStatus.status.value === 'running'"
+          @click="parse"
         >
-          <template v-if="processState === 'processing'">
+          <template v-if="getStatus.status.value === 'running'">
             <div class="flex gap-1 items-center">
               <Loader class="animate-spin size-4" />
-              processing
+              getting
             </div>
           </template>
-          <template v-else-if="processState === 'unprocess'">
-            process video
+          <template v-else-if="getStatus.status.value === 'idle'">
+            get info
           </template>
           <template v-else>
-            video processed
+            info received
           </template>
         </Button>
       </div>
 
-      <div v-if="data?.title" class="grid grid-cols-5 gap-4 bg-secondary p-4 rounded-lg">
+      <div v-if="data" class="grid grid-cols-5 gap-4 bg-secondary p-4 rounded-lg">
         <div class="rounded-lg overflow-hidden col-span-2">
           <AspectRatio :ratio="16 / 9">
             <img v-if="imgUrl" :src="imgUrl" alt="thumbnail">
@@ -132,11 +92,14 @@ async function saveDocument() {
             </div>
           </AspectRatio>
         </div>
-        <div class="col-span-3">
+        <div ref="infoEl" class="col-span-3">
           <p class="text-lg">
-            {{ data?.title }}
+            {{ data.title }}
           </p>
-          <div class="max-h-32 overflow-y-auto mt-4">
+          <div
+            class="overflow-y-auto mt-4"
+            :style="{ maxHeight: `${contentMaxHeight}px` }"
+          >
             <p class="text-pretty text-justify pr-4">
               {{ data.content }}
             </p>
@@ -144,48 +107,5 @@ async function saveDocument() {
         </div>
       </div>
     </div>
-
-    <template v-if="output">
-      <div class="flex justify-center item-center gap-2 mt-4">
-        <Button
-          size="sm"
-          :disabled="processState === 'processing' || isGenerating"
-          @click="generateSet"
-        >
-          <template v-if="isGenerating">
-            <div class="flex gap-1 items-center">
-              <Loader class="animate-spin size-4" />
-              generating
-            </div>
-          </template>
-          <template v-else>
-            generate set
-          </template>
-        </Button>
-
-        <Button
-          size="sm"
-          :disabled="processState === 'processing' || savingState === 'saved' || savingState === 'saving'"
-          @click="saveDocument"
-        >
-          <template v-if="savingState === 'saving'">
-            <div class="flex gap-1 items-center">
-              <Loader class="animate-spin size-4" />
-              saving
-            </div>
-          </template>
-          <template v-else-if="savingState === 'unsave'">
-            save document
-          </template>
-          <template v-else>
-            document saved
-          </template>
-        </Button>
-      </div>
-
-      <div class="p-4 border rounded-lg">
-        <p ref="outputEl" class="pb-8 text-pretty text-justify" v-html="output" />
-      </div>
-    </template>
   </div>
 </template>

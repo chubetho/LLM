@@ -1,5 +1,5 @@
 import type { NewSet } from '~/db'
-import { db, sets, sqlite } from '~/db'
+import { sqlite } from '~/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

@@ -38,8 +38,8 @@ importers:
         specifier: ^3.14.159
         version: 3.14.159(@parcel/watcher@2.5.0)(@types/node@22.9.0)(better-sqlite3@11.5.0)(drizzle-orm@0.36.1(@types/better-sqlite3@7.6.11)(better-sqlite3@11.5.0))(eslint@9.14.0(jiti@2.4.0))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.24.4)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.10(@types/node@22.9.0)(terser@5.36.0))
       ollama:
-        specifier: ^0.5.9
-        version: 0.5.9
+        specifier: ^0.5.10
+        version: 0.5.10
       pdf-parse:
         specifier: ^1.1.1
         version: 1.1.1(patch_hash=nkx2m2oit3tpcrzqwr6y7boyze)
@@ -3924,8 +3924,8 @@ packages:
   ohash@1.1.4:
     resolution: {integrity: sha512-FlDryZAahJmEF3VR3w1KogSEdWX3WhA5GPakFx4J81kEAiHyLMpdLLElS8n8dfNadMgAne/MywcvmogzscVt4g==}
 
-  ollama@0.5.9:
-    resolution: {integrity: sha512-F/KZuDRC+ZsVCuMvcOYuQ6zj42/idzCkkuknGyyGVmNStMZ/sU3jQpvhnl4SyC0+zBzLiKNZJnJeuPFuieWZvQ==}
+  ollama@0.5.10:
+    resolution: {integrity: sha512-M5O4u6S6yZeeKFrKA7ZfGGLjK54otOVGPrOUc3N64zSTpz9J+x/nh93dmD6Py7YLgXzq9I6Nq+PDDoaqJuV3LQ==}
 
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
@@ -9837,7 +9837,7 @@ snapshots:
 
   ohash@1.1.4: {}
 
-  ollama@0.5.9:
+  ollama@0.5.10:
     dependencies:
       whatwg-fetch: 3.6.20
 

@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen flex justify-center items-center py-16">
-    <div class="relative border rounded-lg overflow-hidden w-full h-full max-w-[95vw] 2xl:max-w-[60vw]">
+    <div class="relative border rounded-lg overflow-hidden w-full h-full max-w-[95vw] 2xl:max-w-[80vw]">
       <div class="flex h-full w-full">
         <BaseAside />
 
