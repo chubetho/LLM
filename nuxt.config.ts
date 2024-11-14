@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     'shadcn-nuxt',
     '@nuxtjs/color-mode',
     '@nuxt/fonts',
+    '@nuxtjs/mdc',
   ],
 
   compatibilityDate: '2024-04-03',
@@ -32,6 +33,22 @@ export default defineNuxtConfig({
     esbuild: {
       options: {
         target: 'esnext',
+      },
+    },
+  },
+
+  mdc: {
+    components: {
+      prose: false,
+      map: {
+        h1: 'ProseH1',
+        h2: 'ProseH2',
+        h3: 'ProseH3',
+        h4: 'ProseH4',
+        li: 'ProseLi',
+        ol: 'ProseOl',
+        p: 'ProseP',
+        ul: 'ProseUl',
       },
     },
   },

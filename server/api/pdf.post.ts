@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
     const data = formData[0].data
     const result = await pdf(data)
-    return result.text
+    return result.text.replaceAll('\n', '')
   }
   catch {
     return createError('cant read pdf.')

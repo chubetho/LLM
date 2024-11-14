@@ -51,18 +51,18 @@ watch(file, async (v) => {
     </div>
 
     <div v-if="data" class="bg-secondary rounded-lg p-4">
-      <label class="flex items-center gap-2 peer" for="file_title">
-        <span class="text-lg underline">
+      <label class="flex items-center peer" for="file_title">
+        <input id="file_title" type="checkbox" class="peer sr-only" checked>
+        <span class="underline peer-checked:no-underline underline-offset-4">
           {{ data.title }}
         </span>
-        <input id="file_title" type="checkbox" class="peer sr-only">
-        <span class="peer-checked:-rotate-90 transition-transform">
+        <span class="peer-checked:-rotate-90 transition-transform ml-auto">
           <ChevronDown class="size-5" />
         </span>
       </label>
 
       <div class="mt-4 overflow-y-auto max-h-32 peer-has-[input:checked]:mt-0 peer-has-[input:checked]:max-h-0 transition-all">
-        <p class="text-pretty text-justify pr-4">
+        <p class="text-pretty text-sm text-justify pr-4">
           {{ data.content }}
         </p>
       </div>

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Loader } from 'lucide-vue-next'
+import BaseMarkdown from '~/components/BaseMarkdown.vue'
 
 const data = shallowRef<{ title: string, content: string }>()
 
 const output = ref('')
 const outputEl = ref<HTMLElement>()
 
-const processState = ref<'unprocess' | 'processing' | 'processed'>('unprocess')
+const processStatus = useStatus()
 
 const isGenerating = ref(false)
 async function generateSet() {
@@ -26,13 +27,13 @@ async function generateSet() {
   navigateTo('/insert')
 }
 
-const savingState = ref<'unsave' | 'saving' | 'saved'>('unsave')
+const saveStatus = useStatus()
 async function saveDocument() {
   const textContent = outputEl.value?.textContent
   if (!textContent)
     return
 
-  savingState.value = 'saving'
+  saveStatus.setStatus('running')
 
   const embedding = await embed(textContent)
 
@@ -44,19 +45,21 @@ async function saveDocument() {
     },
   })
 
-  savingState.value = 'saved'
+  saveStatus.setStatus('done')
 }
 
-function process() {
+function process(title: string, content: string) {
   abort()
+
+  data.value = { title, content }
 
   output.value = ''
   chatStream(
-    `Please summarize the following text in a clear and concise manner, focusing on the main points and critical information. Keep the tone informative and neutral. Aim for approximately 20% of the original text's length, unless otherwise specified. Use proper formatting to organize the summary, with each key point or section on a new line. Include headings or bullet points where necessary, and use line breaks to ensure readability:
+    `Provide a detailed summary of the text, including the main arguments, supporting evidence, and any key takeaways. Output in Markdown format.
   ${data.value.content}`,
     (outputText) => {
       if (outputText === '__end__') {
-        output.value = output.value.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replaceAll('*', '')
+        output.value = output.value.trim()
         return
       }
       output.value += outputText
@@ -69,10 +72,10 @@ function process() {
 <template>
   <BasePageWrap>
     <template #heading>
-      summary document
+      summary
     </template>
 
-    <div class="flex gap-4 flex-col">
+    <div class="flex gap-4 flex-col pb-8">
       <Tabs default-value="file">
         <TabsList class="grid w-full grid-cols-2">
           <TabsTrigger value="file">
@@ -84,29 +87,19 @@ function process() {
         </TabsList>
 
         <TabsContent value="file">
-          <DocumentFile
-            @parsed="(title, content) => {
-              data = { title, content }
-            }"
-          />
+          <DocumentFile @parsed="process" />
         </TabsContent>
 
         <TabsContent value="youtube">
-          <DocumentYoutube
-            @parsed="(title, content) => {
-              data = { title, content }
-            }"
-          />
+          <DocumentYoutube @parsed="process" />
         </TabsContent>
       </Tabs>
-
-      {{ data }}
 
       <template v-if="output">
         <div class="flex justify-center item-center gap-2 mt-4">
           <Button
             size="sm"
-            :disabled="processState === 'processing' || isGenerating"
+            :disabled="processStatus.status.value === 'running' || isGenerating"
             @click="generateSet"
           >
             <template v-if="isGenerating">
@@ -122,16 +115,16 @@ function process() {
 
           <Button
             size="sm"
-            :disabled="processState === 'processing' || savingState === 'saved' || savingState === 'saving'"
+            :disabled="processStatus.status.value === 'running' || saveStatus.status.value === 'done' || saveStatus.status.value === 'running'"
             @click="saveDocument"
           >
-            <template v-if="savingState === 'saving'">
+            <template v-if="saveStatus.status.value === 'running'">
               <div class="flex gap-1 items-center">
                 <Loader class="animate-spin size-4" />
                 saving
               </div>
             </template>
-            <template v-else-if="savingState === 'unsave'">
+            <template v-else-if="saveStatus.status.value === 'idle'">
               save document
             </template>
             <template v-else>
@@ -141,7 +134,9 @@ function process() {
         </div>
 
         <div class="p-4 border rounded-lg">
-          <p ref="outputEl" class="pb-8 text-pretty text-justify" v-html="output" />
+          <ClientOnly>
+            <BaseMarkdown :input="output" />
+          </ClientOnly>
         </div>
       </template>
     </div>
