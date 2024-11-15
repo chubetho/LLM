@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Bot, Bug, FileText, Layers, MessageSquare, Moon, Sun } from 'lucide-vue-next'
+import { Bot, Bug, FileText, Layers, MessageSquare, Moon, Settings, Sun } from 'lucide-vue-next'
 
 const colorMode = useColorMode()
 
@@ -53,15 +53,26 @@ function toggleColorMode() {
         </NuxtLink>
       </DevOnly>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        class="mt-auto"
-        @click="toggleColorMode"
-      >
-        <Moon v-if="colorMode.preference === 'dark'" class="size-5" />
-        <Sun v-if="colorMode.preference === 'light'" class="size-5" />
-      </Button>
+      <div class="mt-auto flex flex-col">
+        <Button
+          variant="ghost"
+          size="icon"
+          @click="toggleColorMode"
+        >
+          <Moon v-if="colorMode.preference === 'dark'" class="size-5" />
+          <Sun v-if="colorMode.preference === 'light'" class="size-5" />
+        </Button>
+        <hr class="my-2">
+
+        <NuxtLink to="/settings" active-class="[&>button]:bg-muted">
+          <Button
+            variant="ghost"
+            size="icon"
+          >
+            <Settings class="size-5" />
+          </Button>
+        </NuxtLink>
+      </div>
     </nav>
   </aside>
 </template>

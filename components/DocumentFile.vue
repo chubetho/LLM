@@ -45,7 +45,7 @@ watch(file, async (v) => {
           upload file here
         </p>
         <p class="text-sm text-primary/50">
-          only pdf is supported
+          support only pdf
         </p>
       </button>
     </div>

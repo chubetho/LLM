@@ -4,8 +4,11 @@ import BaseMarkdown from '~/components/BaseMarkdown.vue'
 
 const data = shallowRef<{ title: string, content: string }>()
 
-const output = ref('')
-const outputEl = ref<HTMLElement>()
+const currentTab = ref<'file' | 'youtube'>('file')
+const output = ref({
+  file: '',
+  youtube: '',
+})
 
 const processStatus = useStatus()
 
@@ -16,7 +19,7 @@ async function generateSet() {
 
   isGenerating.value = true
 
-  const response = await chat(
+  const response = await $chat(
     `Using this summary ${JSON.stringify(output.value)} to generate, meaningful cards in JSON format as an array of objects with {term: string, def: string}. ensure each new card is unique.`,
     { format: 'json' },
   )
@@ -29,18 +32,14 @@ async function generateSet() {
 
 const saveStatus = useStatus()
 async function saveDocument() {
-  const textContent = outputEl.value?.textContent
-  if (!textContent)
-    return
-
   saveStatus.setStatus('running')
 
-  const embedding = await embed(textContent)
+  const embedding = await $embed(output.value[currentTab.value])
 
   await $fetch('/api/docs', {
     method: 'POST',
     body: {
-      contents: textContent,
+      contents: output.value,
       embedding,
     },
   })
@@ -53,16 +52,16 @@ function process(title: string, content: string) {
 
   data.value = { title, content }
 
-  output.value = ''
-  chatStream(
+  output.value[currentTab.value] = ''
+  $chatStream(
     `Provide a detailed summary of the text, including the main arguments, supporting evidence, and any key takeaways. Output in Markdown format.
   ${data.value.content}`,
     (outputText) => {
       if (outputText === '__end__') {
-        output.value = output.value.trim()
+        output.value[currentTab.value] = output.value[currentTab.value].trim()
         return
       }
-      output.value += outputText
+      output.value[currentTab.value] += outputText
     },
     { endSymbol: true },
   )
@@ -76,7 +75,7 @@ function process(title: string, content: string) {
     </template>
 
     <div class="flex gap-4 flex-col pb-8">
-      <Tabs default-value="file">
+      <Tabs v-model="currentTab" default-value="file">
         <TabsList class="grid w-full grid-cols-2">
           <TabsTrigger value="file">
             file
@@ -86,17 +85,17 @@ function process(title: string, content: string) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="file">
+        <TabsContent value="file" force-mount>
           <DocumentFile @parsed="process" />
         </TabsContent>
 
-        <TabsContent value="youtube">
+        <TabsContent value="youtube" force-mount>
           <DocumentYoutube @parsed="process" />
         </TabsContent>
       </Tabs>
 
-      <template v-if="output">
-        <div class="flex justify-center item-center gap-2 mt-4">
+      <template v-if="output[currentTab]">
+        <div class="flex justify-center item-center gap-2 mt-2">
           <Button
             size="sm"
             :disabled="processStatus.status.value === 'running' || isGenerating"
@@ -134,9 +133,7 @@ function process(title: string, content: string) {
         </div>
 
         <div class="p-4 border rounded-lg">
-          <ClientOnly>
-            <BaseMarkdown :input="output" />
-          </ClientOnly>
+          <BaseMarkdown :input="output[currentTab]" />
         </div>
       </template>
     </div>

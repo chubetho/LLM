@@ -47,7 +47,7 @@ async function generate() {
 
   isTesting.value = true
 
-  const response = await chat(`
+  const response = await $chat(`
 Using the following flashcards: ${JSON.stringify(set.value.cards)},
 generate a JSON object with a "questions" key containing an array of questions in these formats:
 
@@ -97,7 +97,7 @@ async function ask(nth: number) {
   }
 
   const question = questions.value[nth - 1]
-  const response = await chat(`I answered "${answer.givenAnswer}" to question "${question.question}". Can you explain why this answer might be incorrect?`)
+  const response = await $chat(`I answered "${answer.givenAnswer}" to question "${question.question}". Can you explain why this answer might be incorrect?`)
 
   console.log(response)
 }

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { Bird, CornerDownLeft, Mic, Rabbit, Turtle } from 'lucide-vue-next'
-import BasePageWrap from '~/components/BasePageWrap.vue'
 </script>
 
 <template>
   <BasePageWrap>
     <template #heading>
-      Playground
+      chat
     </template>
 
     <div class="grid h-full flex-1 gap-4 overflow-auto grid-cols-3">

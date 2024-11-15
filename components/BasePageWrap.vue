@@ -8,9 +8,11 @@
       </div>
     </header>
 
-    <div class="h-full p-4 pr-0">
+    <div class="h-full">
       <ScrollArea class="h-[80vh] pr-4 pb-8">
-        <slot />
+        <div class="p-4">
+          <slot />
+        </div>
       </ScrollArea>
     </div>
   </div>

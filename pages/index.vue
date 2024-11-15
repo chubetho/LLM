@@ -6,7 +6,7 @@ const search = ref('')
 const searchDebounced = debouncedRef(search, 500)
 
 const { data: foundSets } = await useAsyncData('search', async () => {
-  const embedding = await embed(searchDebounced.value)
+  const embedding = await $embed(searchDebounced.value)
   return $fetch('/api/sets/find', {
     method: 'POST',
     body: { embedding },
@@ -26,7 +26,7 @@ const showSets = computed(() => foundSets.value || sets.value)
       all quizzes
     </template>
 
-    <div class="space-y-4 p-1">
+    <div class="space-y-4">
       <div class="">
         <Input v-model="search" placeholder="search anything..." />
       </div>

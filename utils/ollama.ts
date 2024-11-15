@@ -1,3 +1,4 @@
+import type { ModelDetails } from 'ollama'
 import ollama from 'ollama'
 
 interface ChatOption {
@@ -5,7 +6,7 @@ interface ChatOption {
   endSymbol?: boolean
 }
 
-export async function chat(input: string, opt?: ChatOption) {
+export async function $chat(input: string, opt?: ChatOption) {
   ollama.abort()
 
   const { format = undefined } = opt || {}
@@ -23,7 +24,7 @@ export function abort() {
   ollama.abort()
 }
 
-export async function chatStream(input: string, cb: (o: string) => void, opt?: ChatOption) {
+export async function $chatStream(input: string, cb: (o: string) => void, opt?: ChatOption) {
   ollama.abort()
 
   const { format = undefined, endSymbol } = opt || {}
@@ -33,6 +34,7 @@ export async function chatStream(input: string, cb: (o: string) => void, opt?: C
     messages: [{ role: 'user', content: input }],
     format,
     stream: true,
+
   })
 
   for await (const part of response) {
@@ -42,7 +44,7 @@ export async function chatStream(input: string, cb: (o: string) => void, opt?: C
     cb('__end__')
 }
 
-export async function embed(input: string) {
+export async function $embed(input: string) {
   const response = await ollama.embed({
     model: 'nomic-embed-text',
     input,
@@ -52,4 +54,26 @@ export async function embed(input: string) {
     throw new Error('expect length = 1')
 
   return response.embeddings[0]
+}
+
+type Model = { name: string, shortname: string } & Pick<ModelDetails, 'parameter_size' | 'quantization_level'>
+export async function $list() {
+  const { models } = await ollama.list()
+  return models.reduce((acc, cur) => {
+    const name = cur.name.split(':').at(0)
+    const el: Model = {
+      shortname: name ?? cur.name,
+      name: cur.name,
+      parameter_size: cur.details.parameter_size,
+      quantization_level: cur.details.quantization_level,
+    }
+
+    if (cur.details.family === 'llama') {
+      acc.tools.push(el)
+      return acc
+    }
+    acc.embeddings.push(el)
+
+    return acc
+  }, { tools: [] as Model[], embeddings: [] as Model[] })
 }
