@@ -1,5 +1,6 @@
 import type { ModelDetails } from 'ollama'
 import ollama from 'ollama'
+import { DEFAULT_TOOLS_CONFIG } from './constants'
 
 interface ChatOption {
   format?: 'json'
@@ -7,7 +8,9 @@ interface ChatOption {
 }
 
 export async function $chat(input: string, opt?: ChatOption) {
-  ollama.abort()
+  const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
+
+  $abort()
 
   const { format = undefined } = opt || {}
 
@@ -15,17 +18,24 @@ export async function $chat(input: string, opt?: ChatOption) {
     model: 'llama3.1:8b',
     messages: [{ role: 'user', content: input }],
     format,
+    options: {
+      temperature: toolsConfig.value.temperature,
+      top_k: toolsConfig.value.topK,
+      top_p: toolsConfig.value.topP,
+    },
   })
 
   return response.message.content
 }
 
-export function abort() {
+export function $abort() {
   ollama.abort()
 }
 
 export async function $chatStream(input: string, cb: (o: string) => void, opt?: ChatOption) {
-  ollama.abort()
+  const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
+
+  $abort()
 
   const { format = undefined, endSymbol } = opt || {}
 
@@ -34,7 +44,11 @@ export async function $chatStream(input: string, cb: (o: string) => void, opt?: 
     messages: [{ role: 'user', content: input }],
     format,
     stream: true,
-
+    options: {
+      temperature: toolsConfig.value.temperature,
+      top_k: toolsConfig.value.topK,
+      top_p: toolsConfig.value.topP,
+    },
   })
 
   for await (const part of response) {
