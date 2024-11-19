@@ -47,7 +47,7 @@ async function appendCardsAutomatically() {
     return
 
   isAppending.value = true
-  const response = await $chat(
+  const response = await $gen(
     `Using these input cards as a reference: ${JSON.stringify(set.value.cards)}, generate additional, meaningful cards in JSON format as an array of objects with {term: string, def: string}. The new cards should follow the same structure and type of content but are not limited to topics mentioned in the input cards. Exclude the "id" property and ensure each new card is unique.`,
     { format: 'json' },
   )
@@ -76,7 +76,7 @@ async function generateDef(c: Card) {
   if (!c.term)
     return
   c.def = ''
-  await $chatStream(`Provide a short, main-content definition for the term "${c.term}". Keep it concise.`, (output) => {
+  await $genStream(`Provide a short, main-content definition for the term "${c.term}". Keep it concise.`, (output) => {
     c.def += output
   })
 }
@@ -89,7 +89,7 @@ async function createSet() {
   if (!_set.cards.length)
     return
 
-  const response = await $chat(
+  const response = await $gen(
     `Using this data set: ${JSON.stringify(_set)}, generate a JSON object with:
    - "name" (a descriptive, meaningful string without "set").
    - "tags" (an array of single-word, lowercase strings; minimum 1 tag, maximum 4).

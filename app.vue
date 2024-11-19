@@ -4,7 +4,7 @@
       <div class="flex h-full w-full">
         <BaseAside />
 
-        <main class="flex flex-col w-full">
+        <main class="flex flex-col w-full [&>div]:h-full">
           <NuxtPage :keepalive="true" />
         </main>
       </div>

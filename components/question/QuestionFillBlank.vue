@@ -37,7 +37,7 @@ async function ask() {
   if (isExplained.value)
     return
 
-  await $chatStream(`Explain briefly why the answer "${answer.value}" is ${check() ? 'correct' : 'incorrect'} for: ${props.question.question}.`, (o) => {
+  await $genStream(`Explain briefly why the answer "${answer.value}" is ${check() ? 'correct' : 'incorrect'} for: ${props.question.question}.`, (o) => {
     explain.value += o
   })
   isExplained.value = true

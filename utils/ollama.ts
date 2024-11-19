@@ -1,4 +1,4 @@
-import type { ModelDetails } from 'ollama'
+import type { Message, ModelDetails } from 'ollama'
 import ollama from 'ollama'
 import { DEFAULT_TOOLS_CONFIG } from './constants'
 
@@ -7,7 +7,7 @@ interface ChatOption {
   endSymbol?: boolean
 }
 
-export async function $chat(input: string, opt?: ChatOption) {
+export async function $gen(input: string, opt?: ChatOption) {
   const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
 
   $abort()
@@ -32,7 +32,7 @@ export function $abort() {
   ollama.abort()
 }
 
-export async function $chatStream(input: string, cb: (o: string) => void, opt?: ChatOption) {
+export async function $genStream(input: string, cb: (o: string) => void, opt?: ChatOption) {
   const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
 
   $abort()
@@ -42,6 +42,32 @@ export async function $chatStream(input: string, cb: (o: string) => void, opt?: 
   const response = await ollama.chat({
     model: toolsConfig.value.name,
     messages: [{ role: 'user', content: input }],
+    format,
+    stream: true,
+    options: {
+      temperature: toolsConfig.value.temperature,
+      top_k: toolsConfig.value.topK,
+      top_p: toolsConfig.value.topP,
+    },
+  })
+
+  for await (const part of response) {
+    cb(part.message.content)
+  }
+  if (endSymbol)
+    cb('__end__')
+}
+
+export async function $chat(messages: Message[], cb: (o: string) => void, opt?: ChatOption) {
+  const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
+
+  $abort()
+
+  const { format = undefined, endSymbol } = opt || {}
+
+  const response = await ollama.chat({
+    model: toolsConfig.value.name,
+    messages,
     format,
     stream: true,
     options: {

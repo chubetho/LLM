@@ -48,7 +48,7 @@ async function send() {
   sendStatus.setStatus('running')
   $abort()
   response.value = ''
-  await $chatStream(input.value, (o) => {
+  await $genStream(input.value, (o) => {
     if (o === '__end__') {
       sendStatus.setStatus('done')
       return

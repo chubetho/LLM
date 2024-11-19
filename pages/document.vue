@@ -19,7 +19,7 @@ async function generateSet() {
 
   isGenerating.value = true
 
-  const response = await $chat(
+  const response = await $gen(
     `Using this summary ${JSON.stringify(output.value)} to generate, meaningful cards in JSON format as an array of objects with {term: string, def: string}. ensure each new card is unique.`,
     { format: 'json' },
   )
@@ -53,7 +53,7 @@ function process(title: string, content: string) {
   data.value = { title, content }
 
   output.value[currentTab.value] = ''
-  $chatStream(
+  $genStream(
     `Provide a detailed summary of the text, including the main arguments, supporting evidence, and any key takeaways. Output in Markdown format.
   ${data.value.content}`,
     (outputText) => {

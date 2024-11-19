@@ -9,7 +9,7 @@ async function embedInput() {
 }
 
 async function generatePodcast() {
-  const response = await $chat(`Base on this ${input.value}
+  const response = await $gen(`Base on this ${input.value}
   Generate for me a long podcast.`)
   console.log(response)
 }
