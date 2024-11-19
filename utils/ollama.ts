@@ -15,7 +15,7 @@ export async function $chat(input: string, opt?: ChatOption) {
   const { format = undefined } = opt || {}
 
   const response = await ollama.chat({
-    model: 'llama3.1:8b',
+    model: toolsConfig.value.name,
     messages: [{ role: 'user', content: input }],
     format,
     options: {
@@ -40,7 +40,7 @@ export async function $chatStream(input: string, cb: (o: string) => void, opt?: 
   const { format = undefined, endSymbol } = opt || {}
 
   const response = await ollama.chat({
-    model: 'llama3.1:8b',
+    model: toolsConfig.value.name,
     messages: [{ role: 'user', content: input }],
     format,
     stream: true,

@@ -49,6 +49,7 @@ export default defineNuxtConfig({
         ol: 'ProseOl',
         p: 'ProseP',
         ul: 'ProseUl',
+        blockquote: 'ProseBlockquote',
       },
     },
   },

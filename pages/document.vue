@@ -48,7 +48,7 @@ async function saveDocument() {
 }
 
 function process(title: string, content: string) {
-  abort()
+  $abort()
 
   data.value = { title, content }
 

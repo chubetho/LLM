@@ -78,7 +78,7 @@ Make sure questions are directly based on the flashcard content, clear, and form
 }
 
 function cancel() {
-  abort()
+  $abort()
   isTesting.value = false
   questions.value = []
 }

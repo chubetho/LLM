@@ -3,8 +3,6 @@ import BasePageWrap from '~/components/BasePageWrap.vue'
 
 const input = ref(``)
 
-console.log(await $list())
-
 async function embedInput() {
   const response = await $embed(input.value)
   console.log(response)
