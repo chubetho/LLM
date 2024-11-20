@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Message } from 'ollama'
-import { CircleStop, CornerDownLeft, Paperclip } from 'lucide-vue-next'
+import { CircleStop, CornerDownLeft, Eraser, Paperclip, Settings2 } from 'lucide-vue-next'
 
 const container = ref<HTMLDivElement>()
 const anchor = ref<HTMLSpanElement>()
@@ -8,12 +8,7 @@ const height = ref(0)
 
 const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
 
-const messages = useLocalStorage<Message[]>('llm_messages', () => [
-  {
-    role: 'system',
-    content: 'you are a chatbot',
-  },
-])
+const messages = useLocalStorage<Message[]>('llm_messages', () => [])
 
 const content = ref('')
 const response = ref('')
@@ -58,11 +53,15 @@ async function stop() {
   status.setStatus('idle')
 }
 
+function clear() {
+  messages.value = []
+}
+
 useEventListener('resize', () => {
   height.value = container.value?.clientHeight ?? 0
-  setTimeout(() => {
-    anchor.value?.scrollIntoView({ behavior: 'smooth' })
-  }, 1000)
+  // setTimeout(() => {
+  //   anchor.value?.scrollIntoView({ behavior: 'smooth' })
+  // }, 1000)
 })
 onMounted(() => {
   window.dispatchEvent(new Event('resize'))
@@ -71,9 +70,37 @@ onMounted(() => {
 
 <template>
   <div class="h-full flex flex-col">
-    <header class="z-10 flex h-[57px] shrink-0 items-center gap-1 border-b bg-background px-4">
+    <header class="z-10 flex justify-between h-[57px] shrink-0 items-center gap-1 border-b bg-background px-4">
       <div class="text-xl grow" data-allow-mismatch>
         chat
+      </div>
+
+      <div class="flex items-center gap-2">
+        <Button size="icon" variant="ghost" @click="clear">
+          <Eraser class="size-5 text-destructive" />
+        </Button>
+
+        <Dialog>
+          <DialogTrigger as="div">
+            <Button size="icon" variant="ghost">
+              <Settings2 class="size-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit profile</DialogTitle>
+              <DialogDescription>
+                Make changes to your profile here. Click save when you're done.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter>
+              <Button>
+                save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </header>
 
@@ -84,7 +111,7 @@ onMounted(() => {
             class="border rounded-lg py-4 pl-2 pr-6"
             :style="{ height: `${height}px` }"
           >
-            <ul class="flex flex-col gap-2" data-allow-mismatch>
+            <ul class="flex flex-col gap-4">
               <Message
                 v-for="(m, i) in messages"
                 :key="i"
