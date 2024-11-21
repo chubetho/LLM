@@ -191,7 +191,7 @@ watch(files, async (v) => {
               <Paperclip class="size-4" />
             </Button>
 
-            <div class="flex items-center gap-12 ml-auto">
+            <div class="flex items-center gap-1.5 ml-auto">
               <ToggleGroup v-model="mode" type="single" variant="outline" size="sm">
                 <ToggleGroupItem value="o1" aria-label="One Shot">
                   O1
