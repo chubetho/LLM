@@ -12,26 +12,20 @@ const { open, files } = useFileDialog({
   multiple: false,
 })
 
-const file = computed(() => {
-  if (!files.value || !files.value.length)
+watch(files, async (v) => {
+  if (!v || !v.length)
     return
 
-  return files.value[0]
-})
-
-watch(file, async (v) => {
-  if (!v)
-    return
-
+  const file = v[0]
   const formData = new FormData()
-  formData.append('data', v)
+  formData.append('data', file)
 
   const content = await $fetch('/api/pdf', {
     method: 'POST',
     body: formData,
   })
 
-  data.value = { title: v.name, content: content?.toString() ?? '' }
+  data.value = { title: file.name, content: content?.toString() ?? '' }
   emit('parsed', data.value.title, data.value.content)
 })
 </script>
@@ -39,7 +33,10 @@ watch(file, async (v) => {
 <template>
   <div class="space-y-8">
     <div>
-      <button class="border w-full rounded-lg h-40 flex items-center justify-center flex-col hover:border-primary transition-colors" @click="open()">
+      <button
+        class="border w-full rounded-lg h-40 flex items-center justify-center flex-col hover:border-primary transition-colors"
+        @click="open()"
+      >
         <Upload class="size-8 mb-2 stroke-[1.5px]" />
         <p class="text-xl mb-1 font-light">
           upload file here

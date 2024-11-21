@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import type { Message } from 'ollama'
-import { CircleStop, CornerDownLeft, Eraser, Paperclip, Settings2 } from 'lucide-vue-next'
+import { Bold, CircleStop, CornerDownLeft, Eraser, Italic, Paperclip, Settings2, Underline } from 'lucide-vue-next'
+
+export type Message =
+(
+  { role: 'assistant' | 'user' } |
+  { role: 'system', type: 'text' } |
+  { role: 'system', type: 'file', name: string }
+) &
+{ content: string }
 
 const container = ref<HTMLDivElement>()
 const anchor = ref<HTMLSpanElement>()
@@ -8,11 +15,17 @@ const height = ref(0)
 
 const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
 
-const messages = useLocalStorage<Message[]>('llm_messages', () => [])
-
 const content = ref('')
 const response = ref('')
 const status = useStatus()
+const DEFAULT_MESSAGES: Message[] = [
+  { role: 'system', content: 'you are an assistant for my studies.', type: 'text' },
+]
+
+const instruction = useLocalStorage('llm_instruction', DEFAULT_MESSAGES[0].content)
+const isInstructionDialogOpen = ref(false)
+const messages = useLocalStorage<Message[]>('llm_messages', () => DEFAULT_MESSAGES)
+const mode = ref<'o1' | 'cot'>()
 
 async function send() {
   status.setStatus('running')
@@ -45,26 +58,58 @@ async function send() {
 }
 
 async function stop() {
-  try {
-    $abort()
-  }
-  catch {}
-
+  $abort()
   status.setStatus('idle')
 }
 
 function clear() {
-  messages.value = []
+  messages.value = DEFAULT_MESSAGES
+}
+
+function saveInstruction() {
+  messages.value.shift()
+  messages.value.unshift({ role: 'system', content: instruction.value, type: 'text' })
+  isInstructionDialogOpen.value = false
 }
 
 useEventListener('resize', () => {
   height.value = container.value?.clientHeight ?? 0
-  // setTimeout(() => {
-  //   anchor.value?.scrollIntoView({ behavior: 'smooth' })
-  // }, 1000)
+  setTimeout(() => {
+    anchor.value?.scrollIntoView({ behavior: 'smooth' })
+  }, 1000)
 })
+
 onMounted(() => {
   window.dispatchEvent(new Event('resize'))
+})
+
+const { open: openUpload, files, reset } = useFileDialog({
+  accept: 'application/pdf',
+  multiple: false,
+})
+
+watch(files, async (v) => {
+  if (!v || !v.length)
+    return
+
+  const file = v[0]
+  const formData = new FormData()
+  formData.append('data', file)
+  reset()
+
+  const content = await $fetch('/api/pdf', {
+    method: 'POST',
+    body: formData,
+  })
+  if (!content)
+    return
+
+  messages.value.push({
+    role: 'system',
+    content: `You are a helpful assistant knowledgeable about the following document: ${content.toString()}`,
+    type: 'file',
+    name: file.name,
+  })
 })
 </script>
 
@@ -80,7 +125,7 @@ onMounted(() => {
           <Eraser class="size-5 text-destructive" />
         </Button>
 
-        <Dialog>
+        <Dialog v-model:open="isInstructionDialogOpen">
           <DialogTrigger as="div">
             <Button size="icon" variant="ghost">
               <Settings2 class="size-5" />
@@ -88,14 +133,18 @@ onMounted(() => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit profile</DialogTitle>
-              <DialogDescription>
-                Make changes to your profile here. Click save when you're done.
-              </DialogDescription>
+              <DialogTitle>instruction</DialogTitle>
             </DialogHeader>
+            <DialogDescription class="sr-only">
+              instruction for model
+            </DialogDescription>
+
+            <div>
+              <Textarea v-model="instruction" class="min-h-32" />
+            </div>
 
             <DialogFooter>
-              <Button>
+              <Button @click="saveInstruction">
                 save
               </Button>
             </DialogFooter>
@@ -115,11 +164,10 @@ onMounted(() => {
               <Message
                 v-for="(m, i) in messages"
                 :key="i"
-                :role="m.role"
-                :value="m.content"
+                :message="m"
               />
 
-              <Message role="assistant" :value="response" />
+              <Message :message="{ role: 'assistant', content: response }" />
               <span ref="anchor" />
             </ul>
           </ScrollArea>
@@ -136,23 +184,42 @@ onMounted(() => {
             @keyup.enter="send"
           />
           <div class="flex items-center p-4 pt-0">
-            <Button variant="ghost" size="icon">
+            <Button
+              variant="ghost" size="icon" type="button"
+              @click="openUpload"
+            >
               <Paperclip class="size-4" />
             </Button>
 
-            <Button
-              v-if="status.status.value === 'idle'"
-              type="submit"
-              size="sm"
-              class="ml-auto gap-1.5"
-            >
-              send
-              <CornerDownLeft class="size-4" />
-            </Button>
+            <div class="flex items-center gap-12 ml-auto">
+              <ToggleGroup v-model="mode" type="single" variant="outline" size="sm">
+                <ToggleGroupItem value="o1" aria-label="One Shot">
+                  O1
+                </ToggleGroupItem>
+                <ToggleGroupItem value="cot" aria-label="Chain Of Thought">
+                  COT
+                </ToggleGroupItem>
+              </ToggleGroup>
 
-            <Button v-else size="icon" class="ml-auto" @click="stop">
-              <CircleStop class="size-5" />
-            </Button>
+              <Button
+                v-if="status.status.value === 'idle'"
+                type="submit"
+                size="sm"
+                class="gap-1"
+              >
+                send
+                <CornerDownLeft class="size-4" />
+              </Button>
+
+              <Button
+                v-else
+                size="icon"
+                variant="destructive"
+                @click="stop"
+              >
+                <CircleStop class="size-5" />
+              </Button>
+            </div>
           </div>
         </form>
       </div>

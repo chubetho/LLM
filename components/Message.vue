@@ -1,17 +1,19 @@
 <script setup lang="ts">
+import type { Message } from '~~/pages/chat.client.vue'
 import { Bot } from 'lucide-vue-next'
 
 const props = defineProps<{
-  role: string
-  value?: string
+  message: Message
 }>()
 
 const containerClass = computed(() => {
-  switch (props.role) {
+  switch (props.message.role) {
     case 'user':{
       return 'self-end'
     }
     case 'system':{
+      if (props.message.type === 'file')
+        return 'self-end'
       return 'self-center'
     }
     case 'assistant':{
@@ -22,11 +24,13 @@ const containerClass = computed(() => {
 })
 
 const contentClass = computed(() => {
-  switch (props.role) {
+  switch (props.message.role) {
     case 'user':{
       return 'bg-secondary px-3 py-1'
     }
     case 'system':{
+      if (props.message.type === 'file')
+        return 'bg-secondary px-3 py-1'
       return 'bg-secondary text-sm px-2 py-0.5'
     }
     case 'assistant':{
@@ -38,16 +42,24 @@ const contentClass = computed(() => {
 </script>
 
 <template>
-  <li v-if="props.value" class="" :class="[containerClass]">
-    <div
-      v-if="props.role === 'assistant'"
-      class="size-9 bg-secondary rounded-full flex items-center justify-center mr-3"
-    >
-      <Bot class="size-5" />
-    </div>
+  <li v-if="props.message.content" class="" :class="[containerClass]">
+    <template v-if="props.message.role === 'system' && props.message.type === 'file'">
+      <div class="rounded-lg w-fit" :class="[contentClass]">
+        {{ props.message.name }}
+      </div>
+    </template>
 
-    <div class="rounded-lg w-fit" :class="[contentClass]">
-      <MDC :value="props.value" :tag="false" />
-    </div>
+    <template v-else>
+      <div
+        v-if="props.message.role === 'assistant'"
+        class="size-9 bg-secondary rounded-full flex items-center justify-center mr-3"
+      >
+        <Bot class="size-5" />
+      </div>
+
+      <div class="rounded-lg w-fit" :class="[contentClass]">
+        <MDC :value="props.message.content" :tag="false" />
+      </div>
+    </template>
   </li>
 </template>
