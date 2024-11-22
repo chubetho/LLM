@@ -1,10 +1,9 @@
-import { eq } from 'drizzle-orm'
-import { db, sets } from '~/db'
+import { db } from '~/db'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   if (!id)
     return
 
-  await db.delete(sets).where(eq(sets.id, +id))
+  db.prepare('delete from table sets where id = ?').run(id)
 })

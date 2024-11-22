@@ -3,7 +3,7 @@ import { ArrowLeft, Loader, Pen, Plus, Sparkle, Trash } from 'lucide-vue-next'
 import type { NewSet } from '~/db'
 
 type Card = NonNullable<NewSet['cards']>[0]
-const setFromYt = useState<{ title: string, cards: (Omit<Card, 'id'>)[] }>('set_from_yt')
+const setFromDocument = useState<{ title: string, cards: (Omit<Card, 'id'>)[] }>('set_from_document')
 
 const id = ref(1)
 const set = ref<NewSet>({
@@ -14,10 +14,10 @@ const set = ref<NewSet>({
   createAt: useDateFormat(new Date(), 'YYYY-MM-DD').value,
 })
 
-if (setFromYt.value) {
-  console.log(setFromYt.value)
-  set.value.name = setFromYt.value.title
-  for (const c of setFromYt.value.cards) {
+if (setFromDocument.value) {
+  console.log(setFromDocument.value)
+  set.value.name = setFromDocument.value.title
+  for (const c of setFromDocument.value.cards) {
     set.value.cards.push({
       id: id.value++,
       term: c.term,
@@ -41,6 +41,7 @@ function appendCardManually() {
 const canAddAutomatically = computed(() => {
   return set.value.cards.some(c => c.term?.length > 5 && c.def?.length > 5)
 })
+
 const isAppending = ref(false)
 async function appendCardsAutomatically() {
   if (!canAddAutomatically.value)
@@ -48,23 +49,36 @@ async function appendCardsAutomatically() {
 
   isAppending.value = true
   const response = await $gen(
-    `Using these input cards as a reference: ${JSON.stringify(set.value.cards)}, generate additional, meaningful cards in JSON format as an array of objects with {term: string, def: string}. The new cards should follow the same structure and type of content but are not limited to topics mentioned in the input cards. Exclude the "id" property and ensure each new card is unique.`,
+    `Based on the following reference cards: ${JSON.stringify(set.value.cards)}, generate additional, meaningful cards in JSON format. Each card should adhere to the schema below, follow the structure and type of content of the reference cards, and include unique information. Avoid duplicating topics or reusing exact terms from the reference cards.
+
+    JSON Schema for the output:
+    {
+      "cards": [
+        {
+          "term": "string",        // The term or concept being defined.
+          "def": "string"          // The detailed definition or explanation of the term.
+        }
+      ]
+    }
+
+    Output should be an array of objects conforming to the schema above. Do not include any additional properties such as "id".`,
     { format: 'json' },
   )
 
   const _cards = JSON.parse(response).cards as { term: string, def: string }[]
+  console.log(response)
 
-  for (const c of _cards) {
-    if (!c.term || !c.def)
-      continue
-    set.value.cards.push({
-      id: id.value++,
-      term: c.term,
-      def: c.def,
-    })
-  }
+  // for (const c of _cards) {
+  //   if (!c.term || !c.def)
+  //     continue
+  //   set.value.cards.push({
+  //     id: id.value++,
+  //     term: c.term,
+  //     def: c.def,
+  //   })
+  // }
 
-  set.value.cards = set.value.cards.filter(c => c.def && c.term)
+  // set.value.cards = set.value.cards.filter(c => c.def && c.term)
   isAppending.value = false
 }
 

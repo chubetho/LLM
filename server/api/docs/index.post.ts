@@ -1,4 +1,4 @@
-import { sqlite } from '~/db'
+import { db } from '~/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -9,6 +9,6 @@ export default defineEventHandler(async (event) => {
     throw createError('contents or embedding is invalid')
 
   const script = `INSERT INTO documents (contents, embedding) VALUES (?, vec_f32(?));`
-  const stmt = sqlite.prepare(script)
+  const stmt = db.prepare(script)
   stmt.run(contents, JSON.stringify(embedding))
 })

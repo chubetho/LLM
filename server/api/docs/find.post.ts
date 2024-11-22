@@ -1,4 +1,4 @@
-import { sqlite } from '~/db'
+import { db } from '~/db'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -17,6 +17,6 @@ export default defineEventHandler(async (event) => {
     order by distance
     limit 5;
   `
-  const response = sqlite.prepare(script).all(JSON.stringify(embedding)) as { id: number, contents: string, distance: number }[]
+  const response = db.prepare(script).all(JSON.stringify(embedding)) as { id: number, contents: string, distance: number }[]
   return response
 })

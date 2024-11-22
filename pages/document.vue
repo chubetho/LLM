@@ -26,7 +26,7 @@ async function generateSet() {
 
   isGenerating.value = false
 
-  useState('set_from_yt', () => ({ title: data.value?.title, cards: JSON.parse(response).cards }))
+  useState('set_from_document', () => ({ title: data.value?.title, cards: JSON.parse(response).cards }))
   navigateTo('/insert')
 }
 
