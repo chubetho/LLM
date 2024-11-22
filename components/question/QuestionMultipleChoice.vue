@@ -21,6 +21,7 @@ async function ask() {
   if (isExplained.value)
     return
 
+  explain.value = ''
   await $genStream(`Explain briefly why the answer "${answer.value}" is ${check() ? 'correct' : 'incorrect'} for: ${props.question.question}.`, (o) => {
     explain.value += o
   })

@@ -13,7 +13,6 @@ const { data: foundSets } = await useAsyncData('search', async () => {
   })
 }, {
   deep: false,
-  lazy: true,
   watch: [searchDebounced],
 })
 
@@ -61,7 +60,7 @@ const showSets = computed(() => foundSets.value || sets.value)
                     Created at {{ set.createAt }}
                   </span>
                   <span>
-                    ({{ set.cards.length }})
+                    ({{ typeof set.cards === 'string' ? JSON.parse(set.cards).length : set.cards.length }})
                   </span>
                 </CardFooter>
               </Card>

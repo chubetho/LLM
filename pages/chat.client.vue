@@ -27,6 +27,10 @@ const isInstructionDialogOpen = ref(false)
 const messages = useLocalStorage<Message[]>('llm_messages', () => DEFAULT_MESSAGES)
 const mode = ref<'o1' | 'cot'>()
 
+function scroll() {
+  anchor.value?.scrollIntoView({ behavior: 'smooth' })
+}
+
 async function send() {
   status.setStatus('running')
 
@@ -39,7 +43,6 @@ async function send() {
 
   await $chat(messages.value, (o) => {
     if (status.status.value === 'idle') {
-      response.value = ''
       return
     }
 
@@ -50,6 +53,8 @@ async function send() {
       })
       response.value = ''
       status.setStatus('idle')
+      scroll()
+
       return
     }
 
@@ -59,6 +64,11 @@ async function send() {
 
 async function stop() {
   $abort()
+  messages.value.push({
+    role: 'assistant',
+    content: response.value,
+  })
+  response.value = ''
   status.setStatus('idle')
 }
 
@@ -74,9 +84,7 @@ function saveInstruction() {
 
 useEventListener('resize', () => {
   height.value = container.value?.clientHeight ?? 0
-  setTimeout(() => {
-    anchor.value?.scrollIntoView({ behavior: 'smooth' })
-  }, 1000)
+  setTimeout(() => scroll(), 1000)
 })
 
 onMounted(() => {
@@ -168,7 +176,7 @@ watch(files, async (v) => {
               />
 
               <Message :message="{ role: 'assistant', content: response }" />
-              <span ref="anchor" />
+              <span ref="anchor" class="mt-auto" />
             </ul>
           </ScrollArea>
         </div>

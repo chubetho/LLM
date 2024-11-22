@@ -20,7 +20,7 @@ async function generateSet() {
   isGenerating.value = true
 
   const response = await $gen(
-    `Using this summary ${JSON.stringify(output.value)} to generate, meaningful cards in JSON format as an array of objects with {term: string, def: string}. ensure each new card is unique.`,
+    `Using this summary ${JSON.stringify(output.value[currentTab.value])} to generate, meaningful cards in JSON format as an array of objects with {term: string, def: string}. ensure each new card is unique.`,
     { format: 'json' },
   )
 
@@ -74,7 +74,7 @@ function process(title: string, content: string) {
       summary
     </template>
 
-    <div class="flex gap-4 flex-col pb-8">
+    <div class="flex gap-4 flex-col pb-4">
       <Tabs v-model="currentTab" default-value="file">
         <TabsList class="grid w-full grid-cols-2">
           <TabsTrigger value="file">

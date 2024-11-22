@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     from sets
 
     order by distance
-    limit 5;
+    limit 1;
   `
   const response = sqlite.prepare(script).all(JSON.stringify(embedding)) as Set[]
   return response
