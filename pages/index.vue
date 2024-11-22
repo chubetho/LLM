@@ -5,18 +5,21 @@ const { data: sets } = await useFetch('/api/sets')
 const search = ref('')
 const searchDebounced = debouncedRef(search, 500)
 
-const { data: foundSets } = await useAsyncData('search', async () => {
-  const embedding = await $embed(searchDebounced.value)
-  return $fetch('/api/sets/find', {
-    method: 'POST',
-    body: { embedding },
-  })
-}, {
-  deep: false,
-  watch: [searchDebounced],
-})
+// const { data: foundSets } = await useAsyncData('search', async () => {
+//   if (!searchDebounced.value)
+//     return []
+//   const embedding = await $embed(searchDebounced.value)
+//   return $fetch('/api/sets/find', {
+//     method: 'POST',
+//     body: { embedding },
+//   })
+// }, {
+//   deep: false,
+//   lazy: true,
+//   watch: [searchDebounced],
+// })
 
-const showSets = computed(() => foundSets.value || sets.value)
+const showSets = computed(() => sets.value)
 </script>
 
 <template>
@@ -34,7 +37,7 @@ const showSets = computed(() => foundSets.value || sets.value)
         <li>
           <Card
             class="group hover:border-primary transition-colors cursor-pointer h-full flex items-center justify-center min-h-40"
-            @click="navigateTo('/insert')"
+            @click="navigateTo('/sets/create')"
           >
             <CirclePlus class="size-16 stroke-[0.5px] stroke-primary/60 group-hover:stroke-primary group-hover:stroke-[1px] transition-colors" />
           </Card>
@@ -44,7 +47,7 @@ const showSets = computed(() => foundSets.value || sets.value)
             <NuxtLink class="group" :to="`/sets/${set.id}`">
               <Card class="group-hover:border-primary transition-colors h-full flex flex-col">
                 <CardHeader>
-                  <CardTitle>{{ set.name }}</CardTitle>
+                  <CardTitle>{{ set.title }}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul class="flex flex-wrap gap-1 pb-3">

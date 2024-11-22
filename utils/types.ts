@@ -18,3 +18,14 @@ export interface QuestionAnswer {
   isTrue: boolean
   givenAnswer: string | undefined
 }
+
+export interface Set {
+  id: number
+  title: string
+  cards: { id: number, term: string, def: string }[]
+  tags: string[]
+  embedding?: any
+  createAt: string
+}
+
+export type NewSet = Omit<Set, 'id'>

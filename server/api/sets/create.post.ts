@@ -1,15 +1,13 @@
 import { db } from '~/db'
+import type { Set } from '~/utils/types'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const set = body.set
+  const set = body.set as Set
 
-  if (!set)
-    throw createError('set is invalid')
-
-  const stmt = db.prepare(`INSERT INTO sets (name, cards, tags, embedding, createAt) VALUES (?, ?, ?, vec_f32(?), ?);`)
+  const stmt = db.prepare(`INSERT INTO sets (title, cards, tags, embedding, createAt) VALUES (?, ?, ?, vec_f32(?), ?);`)
   const lastRowId = stmt.run(
-    set.name,
+    set.title,
     JSON.stringify(set.cards),
     JSON.stringify(set.tags),
     JSON.stringify(set.embedding),

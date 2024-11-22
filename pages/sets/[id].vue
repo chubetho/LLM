@@ -4,12 +4,15 @@ import QuestionFillBlank from '~/components/question/QuestionFillBlank.vue'
 import QuestionMultipleChoice from '~/components/question/QuestionMultipleChoice.vue'
 import QuestionTrueFalse from '~/components/question/QuestionTrueFalse.vue'
 import type { CarouselApi } from '~/components/ui/carousel'
-import type { Set } from '~/db'
-import type { Question, QuestionAnswer } from '~/utils/types'
+import type { Question, QuestionAnswer, Set } from '~/utils/types'
 
 const route = useRoute('sets-id')
-const setId = route.params.id
-const { data: set } = await useFetch<Set>(`/api/sets/${setId}`)
+const id = route.params.id
+const { data: set } = await useFetch<Set>(`/api/sets/get`, {
+  method: 'POST',
+  body: { id },
+})
+console.log(set)
 
 const api = ref<CarouselApi>()
 const totalCount = ref(0)
@@ -105,7 +108,7 @@ async function ask(nth: number) {
 const isDeleting = ref(false)
 async function deleteSet() {
   isDeleting.value = true
-  await $fetch(`/api/sets/delete/${setId}`)
+  await $fetch(`/api/sets/delete/${id}`)
   await navigateTo('/')
   isDeleting.value = false
 }
@@ -117,7 +120,7 @@ async function deleteSet() {
       <div class="flex items-center justify-between">
         <NuxtLink to="/" class="inline-flex items-center gap-2 transition-transform hover:-translate-x-1">
           <ArrowLeft class="size-4" />
-          <span>{{ set?.name ?? 'not found' }}</span>
+          <span>{{ set?.title ?? 'not found' }}</span>
         </NuxtLink>
         <Button
           variant="destructive" size="icon" class="w-8 h-8"
