@@ -38,9 +38,14 @@ async function ask() {
     return
 
   explain.value = ''
-  await $genStream(`Explain briefly why the answer "${answer.value}" is ${check() ? 'correct' : 'incorrect'} for: ${props.question.question}.`, (o) => {
-    explain.value += o
-  })
+  await $genStream(
+    `Explain briefly and focus only on why the answer "${answer.value}" is ${
+      check() ? 'correct' : 'incorrect'
+    }. Do not provide feedback on or reference the question.`,
+    (output) => {
+      explain.value += output
+    },
+  )
   isExplained.value = true
 }
 

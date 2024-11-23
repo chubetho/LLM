@@ -12,7 +12,6 @@ const { data: set } = await useFetch<Set>(`/api/sets/get`, {
   method: 'POST',
   body: { id },
 })
-console.log(set)
 
 const api = ref<CarouselApi>()
 const totalCount = ref(0)
@@ -51,14 +50,26 @@ async function generate() {
   isTesting.value = true
 
   const response = await $gen(`
-Using the following flashcards: ${JSON.stringify(set.value.cards)},
-generate a JSON object with a "questions" key containing an array of questions in these formats:
+Using the flashcards provided: ${JSON.stringify(set.value.cards)}, generate a JSON object with the following structure:
 
-1. **Fill-in-the-blank**: {"type": "fill_blank", "question": "<sentence with '[blank]' as a placeholder for the answer>", "answer": "<correct answer>"}.
-2. **Multiple-choice**: {"type": "multiple_choice", "question": "<question>", "options": ["<option1>", "<option2>", "<option3>", "<option4>"], "answer": "<correct option>"}.
-3. **True/False**: {"type": "true_false", "question": "<question>", "answer": "<true or false>"}.
+{
+  "questions": [
+    {
+      "type": "string", // One of: "fill_blank", "multiple_choice", or "true_false".
+      "question": "string", // The question text in plain English, based on flashcard content.
+      "answer": "string" // The correct answer for the question.
+      // Additional fields based on type:
+      // - For "multiple_choice":
+      "options": ["string", "string", "string", "string"] // Four answer choices, one of which is correct.
+    }
+  ]
+}
 
-Make sure questions are directly based on the flashcard content, clear, and formatted in plain text without any HTML, markup, or special formatting. Each question type should appear at least twice.`, { format: 'json' })
+Requirements:
+- Each question must be derived directly from the flashcard content.
+- Include at least two questions of each type: "fill_blank", "multiple_choice", and "true_false".
+- "fill_blank" questions should use "[blank]" as the placeholder for the missing word(s).
+- Ensure all text is in plain English without any HTML, markup, or special formatting.`, { format: 'json' })
 
   const _questions = JSON.parse(response).questions as Question[]
   for (const q of _questions) {
@@ -76,7 +87,7 @@ Make sure questions are directly based on the flashcard content, clear, and form
       q.answer = q.options[int - 1] ?? q.options[0]
     }
   }
-  questions.value = _questions
+  questions.value = _questions.sort(() => 0.5 - Math.random())
   console.log(questions.value)
 }
 
@@ -91,18 +102,6 @@ function submit() {
   for (const q of questionRefs.value) {
     answers.value.push(q.validate())
   }
-}
-
-async function ask(nth: number) {
-  const answer = answers.value[nth - 1]
-  if (answer.isTrue) {
-    return
-  }
-
-  const question = questions.value[nth - 1]
-  const response = await $gen(`I answered "${answer.givenAnswer}" to question "${question.question}". Can you explain why this answer might be incorrect?`)
-
-  console.log(response)
 }
 
 const isDeleting = ref(false)
@@ -177,14 +176,14 @@ async function deleteSet() {
             <QuestionFillBlank
               v-if="question.type === 'fill_blank'"
               ref="questionRefs"
-              :question="question" :nth="i + 1"
-              @ask="ask"
+              :question="question"
+              :nth="i + 1"
             />
             <QuestionMultipleChoice
               v-if="question.type === 'multiple_choice'"
               ref="questionRefs"
-              :question="question" :nth="i + 1"
-              @ask="ask"
+              :question="question"
+              :nth="i + 1"
             />
             <QuestionTrueFalse
               v-if="question.type === 'true_false'"
@@ -196,7 +195,7 @@ async function deleteSet() {
         </ul>
         <div
           v-else
-          class="flex items-center justify-center h-[50lvh]"
+          class="flex items-center justify-center h-[75lvh]"
         >
           <div class="animate-spin">
             <Loader class="size-12 stroke-1" />

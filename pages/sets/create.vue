@@ -121,7 +121,6 @@ async function create() {
     body: { set: _set },
   })
   isCreating.value = false
-  console.log(lastInsertRowid)
 
   navigateTo(`/sets/${lastInsertRowid}`)
 }
