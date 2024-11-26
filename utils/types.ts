@@ -29,3 +29,11 @@ export interface Set {
 }
 
 export type NewSet = Omit<Set, 'id'>
+
+export type Message =
+(
+  { role: 'assistant' | 'user' } |
+  { role: 'system', type: 'text' } |
+  { role: 'system', type: 'file', name: string }
+) &
+{ content: string }

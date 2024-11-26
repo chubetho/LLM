@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Message } from '~~/pages/chat.client.vue'
 import { Bot } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -26,7 +25,7 @@ const containerClass = computed(() => {
 const contentClass = computed(() => {
   switch (props.message.role) {
     case 'user':{
-      return 'bg-secondary px-3 py-1'
+      return 'bg-secondary px-3 py-1 rounded-tl-lg rounded-tr-sm'
     }
     case 'system':{
       if (props.message.type === 'file')
@@ -34,7 +33,7 @@ const contentClass = computed(() => {
       return 'bg-secondary text-sm px-2 py-0.5'
     }
     case 'assistant':{
-      return ''
+      return 'rounded-tr-lg rounded-tl-sm'
     }
     default: return ''
   }
@@ -44,7 +43,7 @@ const contentClass = computed(() => {
 <template>
   <li v-if="props.message.content" class="" :class="[containerClass]">
     <template v-if="props.message.role === 'system' && props.message.type === 'file'">
-      <div class="rounded-lg w-fit" :class="[contentClass]">
+      <div class="rounded-b-lg w-fit" :class="[contentClass]">
         {{ props.message.name }}
       </div>
     </template>
@@ -57,7 +56,7 @@ const contentClass = computed(() => {
         <Bot class="size-5" />
       </div>
 
-      <div class="rounded-lg w-fit" :class="[contentClass]">
+      <div class="rounded-b-lg w-fit" :class="[contentClass]">
         <MDC :value="props.message.content" :tag="false" />
       </div>
     </template>

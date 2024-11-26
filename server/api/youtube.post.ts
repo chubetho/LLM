@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const url = body.url as string
+  const url = body.url as string | undefined
   if (!url || !URL.canParse(url) || !url.startsWith('https://www.youtube.com'))
     throw createError('url is invalid')
 
@@ -41,6 +41,5 @@ export default defineEventHandler(async (event) => {
     return { title, content: transcriptSegments.join(' ') }
   }
   catch {
-    throw createError('error when processing youtube page')
   }
 })

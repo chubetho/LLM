@@ -1,4 +1,3 @@
-import { db } from '~/db'
 import type { Set } from '~/utils/types'
 
 export default defineEventHandler(async (event) => {

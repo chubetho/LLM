@@ -3,7 +3,7 @@ import { CirclePlus } from 'lucide-vue-next'
 
 const { data: sets } = await useFetch('/api/sets')
 const search = ref('')
-const searchDebounced = debouncedRef(search, 500)
+// const searchDebounced = debouncedRef(search, 500)
 
 // const { data: foundSets } = await useAsyncData('search', async () => {
 //   if (!searchDebounced.value)

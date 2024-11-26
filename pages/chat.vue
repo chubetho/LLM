@@ -1,19 +1,11 @@
 <script setup lang="ts">
-import { Bold, CircleStop, CornerDownLeft, Eraser, Italic, Paperclip, Settings2, Underline } from 'lucide-vue-next'
-
-export type Message =
-(
-  { role: 'assistant' | 'user' } |
-  { role: 'system', type: 'text' } |
-  { role: 'system', type: 'file', name: string }
-) &
-{ content: string }
+import { CircleStop, CornerDownLeft, Eraser, Paperclip, Settings2 } from 'lucide-vue-next'
 
 const container = ref<HTMLDivElement>()
 const anchor = ref<HTMLSpanElement>()
 const height = ref(0)
 
-const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
+const toolsConfig = useLocalStorage('llm_tools', () => DEFAULT_TOOLS_CONFIG)
 
 const content = ref('')
 const response = ref('')
@@ -22,16 +14,19 @@ const DEFAULT_MESSAGES: Message[] = [
   { role: 'system', content: 'you are an assistant for my studies.', type: 'text' },
 ]
 
-const instruction = useLocalStorage('llm_instruction', DEFAULT_MESSAGES[0].content)
+const instruction = useLocalStorage('llm_instruction', () => DEFAULT_MESSAGES[0].content)
 const isInstructionDialogOpen = ref(false)
 const messages = useLocalStorage<Message[]>('llm_messages', () => DEFAULT_MESSAGES)
-const mode = ref<'o1' | 'cot'>()
+const mode = useLocalStorage<'o1' | 'cot'>('llm_chat_mode', () => 'o1')
 
 function scroll() {
   anchor.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
-async function send() {
+async function sendO1() {
+  if (status.status.value === 'running')
+    return
+
   status.setStatus('running')
 
   messages.value.push({
@@ -60,6 +55,10 @@ async function send() {
 
     response.value += o
   }, { endSymbol: true })
+}
+
+async function sendCot() {
+  console.log(content.value)
 }
 
 async function stop() {
@@ -124,7 +123,7 @@ watch(files, async (v) => {
 <template>
   <div class="h-full flex flex-col">
     <header class="z-10 flex justify-between h-[57px] shrink-0 items-center gap-1 border-b bg-background px-4">
-      <div class="text-xl grow" data-allow-mismatch>
+      <div class="text-xl grow">
         chat
       </div>
 
@@ -168,7 +167,7 @@ watch(files, async (v) => {
             class="border rounded-lg py-4 pl-2 pr-6"
             :style="{ height: `${height}px` }"
           >
-            <ul class="flex flex-col gap-4">
+            <ul class="flex flex-col gap-4" data-allow-mismatch>
               <Message
                 v-for="(m, i) in messages"
                 :key="i"
@@ -183,13 +182,13 @@ watch(files, async (v) => {
 
         <form
           class="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
-          @submit.prevent="send"
+          @submit.prevent="mode === 'o1' ? sendO1() : sendCot()"
         >
           <Textarea
             v-model="content"
             placeholder="type your message here..."
             class="min-h-20 resize-none border-0 p-4 shadow-none focus-visible:ring-0"
-            @keyup.enter="send"
+            @keyup.enter.exact="mode === 'o1' ? sendO1() : sendCot()"
           />
           <div class="flex items-center p-4 pt-0">
             <Button
