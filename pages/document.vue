@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Loader } from 'lucide-vue-next'
+import { z } from 'zod'
 import BaseMarkdown from '~/components/BaseMarkdown.vue'
 
 const data = shallowRef<{ title: string, content: string }>()
@@ -8,6 +9,12 @@ const currentTab = ref<'file' | 'youtube'>('file')
 const output = ref({
   file: '',
   youtube: '',
+})
+const summary = computed(() => output.value[currentTab.value])
+
+const setSchema = z.object({
+  title: z.string(),
+  cards: z.object({ term: z.string(), def: z.string() }).array(),
 })
 
 const processStatus = useStatus()
@@ -20,31 +27,35 @@ async function generateSet() {
   isGenerating.value = true
 
   const response = await $gen(
-    `Using this summary ${JSON.stringify(output.value[currentTab.value])} to generate, meaningful cards in JSON format as an array of objects with {term: string, def: string}. ensure each new card is unique.`,
+    `
+  Generate meaningful cards in JSON format based on the provided summary:
+
+  Summary: ${summary.value}
+
+  Output schema:
+  {
+    "title": string, // A concise title summarizing the card set
+    "cards": Array<{
+      "term": string, // The term or key concept for the card
+      "def": string   // A clear and accurate definition or explanation
+    }>
+  }
+  `,
     { format: 'json' },
   )
 
   isGenerating.value = false
 
-  useState('set_from_document', () => ({ title: data.value?.title, cards: JSON.parse(response).cards }))
-  navigateTo('/insert')
-}
+  const set = setSchema.safeParse(JSON.parse(response))
+  console.log(set)
 
-const saveStatus = useStatus()
-async function saveDocument() {
-  saveStatus.setStatus('running')
+  if (set.error || !set.data) {
+    console.error(set.error)
+    return
+  }
 
-  const embedding = await $embed(output.value[currentTab.value])
-
-  await $fetch('/api/docs', {
-    method: 'POST',
-    body: {
-      contents: output.value,
-      embedding,
-    },
-  })
-
-  saveStatus.setStatus('done')
+  useState('set_from_document', () => ({ title: set.data.title, cards: set.data.cards }))
+  navigateTo('/sets/create')
 }
 
 function process(title: string, content: string) {
@@ -52,19 +63,29 @@ function process(title: string, content: string) {
 
   data.value = { title, content }
 
+  const messages = $chunk(content, { max: 2048 }).map(c => ({
+    role: 'system',
+    content: c,
+  }))
+
+  messages.unshift({
+    role: 'system',
+    content: 'Provide a text in small chunks',
+  })
+
+  messages.push({
+    role: 'user',
+    content: 'Provide a detailed summary of the text, including the main arguments, supporting evidence, and any key takeaways.',
+  })
+
   output.value[currentTab.value] = ''
-  $genStream(
-    `Provide a detailed summary of the text, including the main arguments, supporting evidence, and any key takeaways. Output in Markdown format.
-  ${data.value.content}`,
-    (outputText) => {
-      if (outputText === '__end__') {
-        output.value[currentTab.value] = output.value[currentTab.value].trim()
-        return
-      }
-      output.value[currentTab.value] += outputText
-    },
-    { endSymbol: true },
-  )
+
+  $chat(messages, (outputText) => {
+    if (outputText === '__end__') {
+      return
+    }
+    output.value[currentTab.value] += outputText
+  }, { endSymbol: true })
 }
 </script>
 
@@ -95,7 +116,7 @@ function process(title: string, content: string) {
       </Tabs>
 
       <template v-if="output[currentTab]">
-        <div class="flex justify-center item-center gap-2 mt-2">
+        <div class="flex justify-center item-center gap-2 mt-0">
           <Button
             size="sm"
             :disabled="processStatus.status.value === 'running' || isGenerating"
@@ -109,25 +130,6 @@ function process(title: string, content: string) {
             </template>
             <template v-else>
               generate set
-            </template>
-          </Button>
-
-          <Button
-            size="sm"
-            :disabled="processStatus.status.value === 'running' || saveStatus.status.value === 'done' || saveStatus.status.value === 'running'"
-            @click="saveDocument"
-          >
-            <template v-if="saveStatus.status.value === 'running'">
-              <div class="flex gap-1 items-center">
-                <Loader class="animate-spin size-4" />
-                saving
-              </div>
-            </template>
-            <template v-else-if="saveStatus.status.value === 'idle'">
-              save document
-            </template>
-            <template v-else>
-              document saved
             </template>
           </Button>
         </div>

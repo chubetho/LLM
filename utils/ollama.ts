@@ -84,6 +84,27 @@ export async function $chat(messages: Message[], cb: (o: string) => void, opt?: 
     cb('__end__')
 }
 
+export async function $chatFast(messages: Message[], opt?: ChatOption) {
+  const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
+
+  $abort()
+
+  const { format = undefined } = opt || {}
+
+  const response = await ollama.chat({
+    model: toolsConfig.value.name,
+    messages,
+    format,
+    options: {
+      temperature: toolsConfig.value.temperature,
+      top_k: toolsConfig.value.topK,
+      top_p: toolsConfig.value.topP,
+    },
+  })
+
+  return response.message.content
+}
+
 export async function $embed(input: string) {
   const response = await ollama.embed({
     model: 'nomic-embed-text',

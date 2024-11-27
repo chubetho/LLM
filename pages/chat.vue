@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CircleStop, CornerDownLeft, Eraser, Paperclip, Settings2 } from 'lucide-vue-next'
+import { CircleStop, CornerDownLeft, Eraser, Loader, Paperclip, Settings2 } from 'lucide-vue-next'
 
 const container = ref<HTMLDivElement>()
 const anchor = ref<HTMLSpanElement>()
@@ -17,13 +17,12 @@ const DEFAULT_MESSAGES: Message[] = [
 const instruction = useLocalStorage('llm_instruction', () => DEFAULT_MESSAGES[0].content)
 const isInstructionDialogOpen = ref(false)
 const messages = useLocalStorage<Message[]>('llm_messages', () => DEFAULT_MESSAGES)
-const mode = useLocalStorage<'o1' | 'cot'>('llm_chat_mode', () => 'o1')
 
 function scroll() {
   anchor.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
-async function sendO1() {
+async function send() {
   if (status.status.value === 'running')
     return
 
@@ -33,7 +32,6 @@ async function sendO1() {
     role: 'user',
     content: content.value,
   })
-
   content.value = ''
 
   await $chat(messages.value, (o) => {
@@ -55,10 +53,6 @@ async function sendO1() {
 
     response.value += o
   }, { endSymbol: true })
-}
-
-async function sendCot() {
-  console.log(content.value)
 }
 
 async function stop() {
@@ -162,7 +156,7 @@ watch(files, async (v) => {
 
     <div class="grow p-2 flex flex-col">
       <div class="relative flex grow flex-col gap-4 p-2">
-        <div ref="container" class="grow">
+        <div ref="container" class="relative grow">
           <ScrollArea
             class="border rounded-lg py-4 pl-2 pr-6"
             :style="{ height: `${height}px` }"
@@ -175,20 +169,21 @@ watch(files, async (v) => {
               />
 
               <Message :message="{ role: 'assistant', content: response }" />
-              <span ref="anchor" class="mt-auto" />
+              <p ref="anchor" class="mt-auto pb-8" />
             </ul>
           </ScrollArea>
         </div>
 
         <form
           class="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
-          @submit.prevent="mode === 'o1' ? sendO1() : sendCot()"
+          @submit.prevent="send"
         >
           <Textarea
             v-model="content"
             placeholder="type your message here..."
             class="min-h-20 resize-none border-0 p-4 shadow-none focus-visible:ring-0"
-            @keyup.enter.exact="mode === 'o1' ? sendO1() : sendCot()"
+            :disabled="status.status.value === 'running'"
+            @keyup.enter.exact="send"
           />
           <div class="flex items-center p-4 pt-0">
             <Button
@@ -199,15 +194,6 @@ watch(files, async (v) => {
             </Button>
 
             <div class="flex items-center gap-1.5 ml-auto">
-              <ToggleGroup v-model="mode" type="single" variant="outline" size="sm">
-                <ToggleGroupItem value="o1" aria-label="One Shot">
-                  O1
-                </ToggleGroupItem>
-                <ToggleGroupItem value="cot" aria-label="Chain Of Thought">
-                  COT
-                </ToggleGroupItem>
-              </ToggleGroup>
-
               <Button
                 v-if="status.status.value === 'idle'"
                 type="submit"
@@ -239,7 +225,7 @@ watch(files, async (v) => {
         </p>
 
         <p class="text-sm text-muted-foreground">
-          temperature: {{ toolsConfig.temperature }} | topK: {{ toolsConfig.topK }} | topP: {{ toolsConfig.topP }}
+          temperature: {{ toolsConfig.temperature }} | top k: {{ toolsConfig.topK }} | top p: {{ toolsConfig.topP }}
         </p>
       </div>
     </div>

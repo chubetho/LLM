@@ -204,9 +204,9 @@ async function deleteSet() {
       </div>
 
       <template v-else>
-        <div class="max-w-[80%] mx-auto">
+        <div class="max-w-[80%] mx-auto space-y-4">
           <Carousel
-            class="bg-secondary rounded-lg mb-4"
+            class="bg-secondary rounded-lg"
             :opts="{ watchDrag: false }"
             @init-api="setApi"
           >
@@ -215,7 +215,7 @@ async function deleteSet() {
                 v-for="card in set.cards"
                 :key="card.id" class="basis-full h-80 group"
               >
-                <div class="relative h-full group-hover:[transform:rotateY(180deg)] transition-transform [transition-delay:300ms] duration-500 [transform-style:preserve-3d]">
+                <div class="relative h-full text-xl group-hover:[transform:rotateY(180deg)] transition-transform [transition-delay:300ms] duration-500 [transform-style:preserve-3d]">
                   <div class="absolute inset-0 max-w-[80%] mx-auto w-full h-full flex items-center justify-center text-pretty text-center [backface-visibility:hidden]">
                     {{ card.term }}
                   </div>
@@ -232,12 +232,29 @@ async function deleteSet() {
           <div class="text-center text-sm">
             {{ current }}/{{ totalCount }}
           </div>
-        </div>
 
-        <div class="flex justify-center mt-4">
-          <Button size="xs" @click="generate">
-            generate tests
-          </Button>
+          <div class="flex justify-center">
+            <Button size="xs" @click="generate">
+              generate tests
+            </Button>
+          </div>
+
+          <ul class="flex flex-col gap-4 pt-4">
+            <li
+              v-for="(c, i) in set.cards" :key="i"
+              class="relative"
+            >
+              <span class="absolute top-4 -left-8 text-muted-foreground">#{{ i + 1 }}</span>
+              <div class="grow grid grid-cols-2 gap-4">
+                <div class="p-4 rounded-lg bg-secondary">
+                  {{ c.term }}
+                </div>
+                <div class="p-4 rounded-lg bg-secondary">
+                  {{ c.def }}
+                </div>
+              </div>
+            </li>
+          </ul>
         </div>
       </template>
     </div>

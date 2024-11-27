@@ -8,7 +8,7 @@ const props = defineProps<{
 const containerClass = computed(() => {
   switch (props.message.role) {
     case 'user':{
-      return 'self-end'
+      return 'self-end max-w-[75%]'
     }
     case 'system':{
       if (props.message.type === 'file')
@@ -25,15 +25,15 @@ const containerClass = computed(() => {
 const contentClass = computed(() => {
   switch (props.message.role) {
     case 'user':{
-      return 'bg-secondary px-3 py-1 rounded-tl-lg rounded-tr-sm'
+      return 'bg-secondary px-3 py-1 rounded-lg'
     }
     case 'system':{
       if (props.message.type === 'file')
-        return 'bg-secondary px-3 py-1'
-      return 'bg-secondary text-sm px-2 py-0.5'
+        return 'bg-secondary rounded-lg px-3 py-1'
+      return 'bg-secondary rounded-lg text-sm px-2 py-0.5'
     }
     case 'assistant':{
-      return 'rounded-tr-lg rounded-tl-sm'
+      return ''
     }
     default: return ''
   }

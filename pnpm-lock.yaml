@@ -61,6 +61,9 @@ importers:
       vue-router:
         specifier: latest
         version: 4.4.5(vue@3.5.13(typescript@5.6.3))
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^3.10.0
