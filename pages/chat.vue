@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CircleStop, CornerDownLeft, Eraser, Loader, Paperclip, Settings2 } from 'lucide-vue-next'
+import { CircleStop, CornerDownLeft, Eraser, Paperclip, Settings2 } from 'lucide-vue-next'
 
 const container = ref<HTMLDivElement>()
 const anchor = ref<HTMLSpanElement>()

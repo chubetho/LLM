@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Sparkle } from 'lucide-vue-next'
 import type { Question, QuestionAnswer } from '~/utils/types'
+import { Sparkle } from 'lucide-vue-next'
 
 const props = defineProps<{
   nth: number

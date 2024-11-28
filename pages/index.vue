@@ -3,23 +3,23 @@ import { CirclePlus } from 'lucide-vue-next'
 
 const { data: sets } = await useFetch('/api/sets')
 const search = ref('')
-// const searchDebounced = debouncedRef(search, 500)
+const searchDebounced = debouncedRef(search, 500)
 
-// const { data: foundSets } = await useAsyncData('search', async () => {
-//   if (!searchDebounced.value)
-//     return []
-//   const embedding = await $embed(searchDebounced.value)
-//   return $fetch('/api/sets/find', {
-//     method: 'POST',
-//     body: { embedding },
-//   })
-// }, {
-//   deep: false,
-//   lazy: true,
-//   watch: [searchDebounced],
-// })
+const { data: foundSets } = await useAsyncData('search', async () => {
+  if (!searchDebounced.value)
+    return []
+  const embedding = await $embed(searchDebounced.value)
+  return $fetch('/api/sets/find', {
+    method: 'POST',
+    body: { embedding },
+  })
+}, {
+  deep: false,
+  lazy: true,
+  watch: [searchDebounced],
+})
 
-const showSets = computed(() => sets.value)
+const showSets = computed(() => foundSets.value?.length ? foundSets.value : sets.value)
 </script>
 
 <template>
@@ -47,12 +47,14 @@ const showSets = computed(() => sets.value)
             <NuxtLink class="group" :to="`/sets/${set.id}`">
               <Card class="group-hover:border-primary transition-colors h-full flex flex-col">
                 <CardHeader>
-                  <CardTitle>{{ set.title }}</CardTitle>
+                  <CardTitle class="lowercase">
+                    {{ set.title }}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul class="flex flex-wrap gap-1 pb-3">
                     <li v-for="tag in (typeof set.tags === 'string' ? JSON.parse(set.tags) as string[] : set.tags)" :key="tag">
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" class="lowercase">
                         {{ tag }}
                       </Badge>
                     </li>

@@ -5,7 +5,7 @@
         <BaseAside />
 
         <main class="flex flex-col w-full [&>div]:h-full">
-          <NuxtPage :keepalive="true" />
+          <NuxtPage />
         </main>
       </div>
     </div>

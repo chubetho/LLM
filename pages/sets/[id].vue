@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import type { CarouselApi } from '~/components/ui/carousel'
+import type { Question, QuestionAnswer, Set } from '~/utils/types'
 import { ArrowLeft, Loader, Trash } from 'lucide-vue-next'
 import QuestionFillBlank from '~/components/question/QuestionFillBlank.vue'
 import QuestionMultipleChoice from '~/components/question/QuestionMultipleChoice.vue'
 import QuestionTrueFalse from '~/components/question/QuestionTrueFalse.vue'
-import type { CarouselApi } from '~/components/ui/carousel'
-import type { Question, QuestionAnswer, Set } from '~/utils/types'
 
 const route = useRoute('sets-id')
 const id = route.params.id
@@ -117,9 +117,9 @@ async function deleteSet() {
   <BasePageWrap>
     <template #heading>
       <div class="flex items-center justify-between">
-        <NuxtLink to="/" class="inline-flex items-center gap-2 transition-transform hover:-translate-x-1">
+        <NuxtLink to="/" class="inline-flex items-center gap-2">
           <ArrowLeft class="size-4" />
-          <span>{{ set?.title ?? 'not found' }}</span>
+          <span class="lowercase">{{ set?.title ?? 'not found' }}</span>
         </NuxtLink>
         <Button
           variant="destructive" size="icon" class="w-8 h-8"
@@ -139,6 +139,7 @@ async function deleteSet() {
             <li
               v-for="tag in set.tags"
               :key="tag"
+              class="lowercase"
             >
               <Badge variant="secondary">
                 {{ tag }}
@@ -204,7 +205,7 @@ async function deleteSet() {
       </div>
 
       <template v-else>
-        <div class="max-w-[80%] mx-auto space-y-4">
+        <div class="max-w-[80%] mx-auto space-y-4 mt-8">
           <Carousel
             class="bg-secondary rounded-lg"
             :opts="{ watchDrag: false }"
@@ -238,24 +239,24 @@ async function deleteSet() {
               generate tests
             </Button>
           </div>
-
-          <ul class="flex flex-col gap-4 pt-4">
-            <li
-              v-for="(c, i) in set.cards" :key="i"
-              class="relative"
-            >
-              <span class="absolute top-4 -left-8 text-muted-foreground">#{{ i + 1 }}</span>
-              <div class="grow grid grid-cols-2 gap-4">
-                <div class="p-4 rounded-lg bg-secondary">
-                  {{ c.term }}
-                </div>
-                <div class="p-4 rounded-lg bg-secondary">
-                  {{ c.def }}
-                </div>
-              </div>
-            </li>
-          </ul>
         </div>
+
+        <ul class="flex flex-col gap-4 mt-8">
+          <li
+            v-for="(c, i) in set.cards" :key="i"
+            class="flex items-center gap-4"
+          >
+            <span class="text-muted-foreground">#{{ i + 1 }}</span>
+            <div class="grow grid grid-cols-2 gap-4">
+              <div class="p-4 rounded-lg bg-secondary">
+                {{ c.term }}
+              </div>
+              <div class="p-4 rounded-lg bg-secondary">
+                {{ c.def }}
+              </div>
+            </div>
+          </li>
+        </ul>
       </template>
     </div>
   </BasePageWrap>
