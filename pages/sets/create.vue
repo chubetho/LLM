@@ -144,7 +144,6 @@ async function create() {
 
         <Button
           :disabled="isCreating"
-          size="sm"
           @click="create"
         >
           <div v-if="isCreating" class="flex gap-1 items-center">

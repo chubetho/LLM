@@ -1,23 +1,27 @@
-export type Question = {
-  type: 'fill_blank'
-  question: string
-  answer: string
-} | {
-  type: 'multiple_choice'
-  question: string
-  options: string[]
-  answer: string
-} | {
-  type: 'true_false'
-  question: string
-  answer: string
-}
+import { z } from 'zod'
 
-export interface QuestionAnswer {
-  nth: number
-  isTrue: boolean
-  givenAnswer: string | undefined
-}
+const fillBlankSchema = z.object({
+  type: z.literal('fill_blank'),
+  question: z.string(),
+  answer: z.string(),
+})
+
+const multipleChoiceSchema = z.object({
+  type: z.literal('multiple_choice'),
+  question: z.string(),
+  options: z.array(z.string()).length(4),
+  answer: z.string(),
+})
+
+const trueFalseSchema = z.object({
+  type: z.literal('true_false'),
+  question: z.string(),
+  answer: z.string(),
+})
+
+export const questionSchema = z.union([fillBlankSchema, multipleChoiceSchema, trueFalseSchema])
+
+export type Question = z.infer<typeof questionSchema> & { id: number, input: string | undefined }
 
 export interface Set {
   id: number

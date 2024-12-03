@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     createAt 
   FROM sets 
   WHERE id = ?;`)
-    .get(id)
+    .get(id) as Set
 
   // @ts-expect-error no type
   _set.cards = JSON.parse(_set.cards) as Set['cards']

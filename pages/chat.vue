@@ -197,7 +197,6 @@ watch(files, async (v) => {
               <Button
                 v-if="status.status.value === 'idle'"
                 type="submit"
-                size="sm"
                 class="gap-1"
               >
                 send

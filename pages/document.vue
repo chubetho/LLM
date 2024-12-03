@@ -118,7 +118,6 @@ function process(title: string, content: string) {
       <template v-if="output[currentTab]">
         <div class="flex justify-center item-center gap-2 mt-0">
           <Button
-            size="sm"
             :disabled="processStatus.status.value === 'running' || isGenerating"
             @click="generateSet"
           >
