@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Loader, Youtube } from 'lucide-vue-next'
+import { LoaderCircle, Youtube } from 'lucide-vue-next'
 
 const emit = defineEmits<{
   parsed: [title: string, content: string]
@@ -70,7 +70,7 @@ async function parse() {
         >
           <template v-if="getStatus.status.value === 'running'">
             <div class="flex gap-1 items-center">
-              <Loader class="animate-spin size-4" />
+              <LoaderCircle class="animate-spin size-4" />
               getting
             </div>
           </template>

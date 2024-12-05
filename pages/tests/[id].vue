@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Question, Set } from '~/utils/types'
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, LoaderCircle } from 'lucide-vue-next'
 import { z } from 'zod'
 
 definePageMeta({
@@ -19,185 +19,102 @@ const state = ref<'testing' | 'submitted'>('testing')
 const currentId = ref(0)
 const currentQuestion = computed(() => questions.value.find(q => q.id === currentId.value))
 const progress = computed(() => Math.floor((currentId.value + 1) * 100 / questions.value.length))
+const score = ref(0)
 
 async function generate() {
   if (!set.value)
     return
 
-  //   const jsonSchema = `
-  // {
-  //   "questions": {
-  //     "type": "array",
-  //     "minItems": ${set.value.cards.length * 2},
-  //     "items": {
-  //       "type": "object",
-  //       "properties": {
-  //         "type": {
-  //           "type": "string",
-  //           "enum": ["fill_blank", "multiple_choice", "true_false"],
-  //           "description": "Type of question."
-  //         },
-  //         "question": {
-  //           "type": "string",
-  //           "description": "The question text in plain English. For 'fill_blank' questions, the answer must be included in the question as a placeholder (e.g., 'The capital of France is ___')."
-  //         },
-  //         "answer": {
-  //           "type": "string",
-  //           "description": "The correct answer for the question.",
-  //           "default": "",
-  //           "anyOf": [
-  //             {
-  //               "type": "string",
-  //               "enum": ["true", "false"],
-  //               "description": "For 'true_false' type, the answer must be either 'true' or 'false'."
-  //             },
-  //             {
-  //               "type": "string",
-  //               "description": "For 'fill_blank' and 'multiple_choice', the answer is a freeform string."
-  //             }
-  //           ]
-  //         },
-  //         "options": {
-  //           "type": "array",
-  //           "description": "List of answer choices for 'multiple_choice' questions.",
-  //           "minItems": 4,
-  //           "maxItems": 4,
-  //           "items": {
-  //             "type": "string"
-  //           }
-  //         }
-  //       },
-  //       "required": ["type", "question", "answer"],
-  //       "additionalProperties": false,
-  //       "if": {
-  //         "properties": {
-  //           "type": { "const": "multiple_choice" }
-  //         }
-  //       },
-  //       "then": {
-  //         "required": ["options"]
-  //       },
-  //       "else": {
-  //         "not": {
-  //           "required": ["options"]
-  //         }
-  //       }
-  //     }
-  //   },
-  // }`
+  const systemPrompt = `
+You are a knowledgeable teacher tasked with creating educational questions in JSON format. Your goal is to generate exactly ${
+  set.value.cards.length * 2
+} questions based on the user's flashcard data. Ensure all questions are structured properly and follow the format below:
 
-  //   const systemPrompt = `
-  // You are a teacher tasked with generating educational questions in JSON format. Create a JSON object containing exactly ${
-  //   set.value.cards.length * 2
-  // } questions based on the user's flashcard data. Your output must strictly follow this JSON schema:
+### JSON Structure:
+{
+  "questions": [
+    {
+      "type": "string", // One of: "fill_blank", "multiple_choice", "true_false".
+      "question": "string", // The question text in plain English. For "fill_blank", include the answer as a placeholder (e.g., "The capital of France is ___").
+      "answer": "string", // The correct answer. For "true_false", it must be "true" or "false".
+      "options": ["string", "string", "string", "string"] // Required only for "multiple_choice". Provide exactly 4 options.
+    },
+    ...
+  ]
+}
 
-  // ${jsonSchema}
+### Instructions:
+1. **General Requirements**:
+   - Each question must include "type", "question", and "answer".
+   - Ensure all fields are non-empty and formatted correctly.
+   - Base all questions on the user's flashcard data, ensuring accuracy and relevance.
+   - Validate that all questions comply with the provided structure before submitting the JSON object.
 
-  // ### Instructions:
-  // - Each question must include a valid "type", "question", and "answer".
-  // - For "fill_blank" questions:
-  //   - The answer must appear in the question as a placeholder (e.g., 'The capital of France is ___').
-  //   - Ensure the placeholder aligns with the correct answer.
-  // - For "multiple_choice" questions:
-  //   - Provide exactly 4 options.
-  // - For "true_false" questions:
-  //   - The answer must be either "true" or "false".
-  // - All fields must be non-empty and consistent with the schema.
-  // - Validate that all fields and nested structures adhere to the schema before finalizing the JSON.
+2. **Question Types**:
+   - **"fill_blank"**:
+     - Include the answer as a placeholder in the question text (e.g., "The capital of France is ___").
+     - Ensure the placeholder aligns with the correct answer.
+   - **"multiple_choice"**:
+     - Provide exactly 4 unique and relevant options, one of which must be the correct answer.
+     - Example: "What is the capital of France?" with options ["Paris", "London", "Rome", "Berlin"].
+   - **"true_false"**:
+     - The answer must strictly be either "true" or "false".
+     - Example: "The Earth revolves around the Sun."
 
-  // ### Important:
-  // - Base all questions on the user's provided flashcards.
-  // - Ensure diversity in question types and relevance to the content.
-  // `
+3. **Validation**:
+   - Ensure the generated JSON object is properly formatted and adheres to the specified structure.
+   - Avoid any additional or unnecessary fields outside the defined structure.
+   - Include only content relevant to the flashcard data provided by the user.
 
-  // const res = await $chatFast(
-  //   [
-  //     {
-  //       role: 'system',
-  //       content: systemPrompt,
-  //     },
-  //     {
-  //       role: 'user',
-  //       content: JSON.stringify(set.value.cards),
-  //     },
-  //   ],
-  //   { format: 'json' },
-  // )
+4. **Output Format**:
+   - Respond with a single JSON object containing the "questions" array.
+   - Do not include any text or explanation outside the JSON object.
+   - Ensure your response is clear, concise, and adheres strictly to the requirements.
 
-  // const parsed = JSON.parse(res)
-  const parsed = {
-    questions: [
+### Example Output:
+{
+  "questions": [
+    {
+      "type": "fill_blank",
+      "question": "The capital of France is ___",
+      "answer": "Paris"
+    },
+    {
+      "type": "multiple_choice",
+      "question": "What is the capital of France?",
+      "answer": "Paris",
+      "options": ["Paris", "London", "Rome", "Berlin"]
+    },
+    {
+      "type": "true_false",
+      "question": "The Earth revolves around the Sun.",
+      "answer": "true"
+    }
+  ]
+}
+
+### Additional Notes:
+- Ensure variety in question types and alignment with the flashcard content.
+- Focus on generating high-quality educational questions that align with the user's flashcards.
+- Do not include explanations, comments, or text outside the JSON object.
+`
+
+  const res = await $chatFast(
+    [
       {
-        type: 'fill_blank',
-        question: 'The capital of France is ___.',
-        answer: 'Paris',
+        role: 'system',
+        content: systemPrompt,
       },
       {
-        type: 'multiple_choice',
-        question: 'What is the capital of Italy?',
-        options: [
-          'Rome',
-          'Paris',
-          'London',
-          'Berlin',
-        ],
-        answer: 'Rome',
-      },
-      {
-        type: 'true_false',
-        question: 'Is Crete the largest island in Greece?',
-        answer: 'true',
-      },
-      {
-        type: 'fill_blank',
-        question: 'The river that flows through London is ___.',
-        answer: 'Thames River',
-      },
-      {
-        type: 'multiple_choice',
-        question: 'What river flows through London?',
-        options: [
-          'Seine',
-          'Rhine',
-          'Thames River',
-          'Danube',
-        ],
-        answer: 'Thames River',
-      },
-      {
-        type: 'fill_blank',
-        question: 'The highest mountain peak in Norway is ___.',
-        answer: 'Galdhøpiggen',
-      },
-      {
-        type: 'true_false',
-        question: 'Is the capital of France located on an island?',
-        answer: 'false',
-      },
-      {
-        type: 'multiple_choice',
-        question: 'What is the highest mountain peak in Norway?',
-        options: [
-          'Galdhøpiggen',
-          'Mount Olympus',
-          'K2',
-          'Everest',
-        ],
-        answer: 'Galdhøpiggen',
-      },
-      {
-        type: 'fill_blank',
-        question: 'The capital of Italy is ___.',
-        answer: 'Rome',
-      },
-      {
-        type: 'true_false',
-        question: 'Is Rome the largest city in Greece?',
-        answer: 'false',
+        role: 'user',
+        content: JSON.stringify(set.value.cards),
       },
     ],
-  }
-  const zodSchema = z.object({ questions: z.array(questionSchema).min(6) })
+    { format: 'json' },
+  )
+
+  const parsed = JSON.parse(res)
+  const zodSchema = z.object({ questions: z.array(questionSchema) })
   const { data, error } = zodSchema.safeParse(parsed)
 
   if (error) {
@@ -207,6 +124,7 @@ async function generate() {
 
   questions.value = data.questions.map((q, id) => ({ ...q, id, input: undefined }))
 }
+
 onMounted(() => {
   generate()
 })
@@ -215,7 +133,15 @@ provide('context', { questions, state })
 
 function submit() {
   state.value = 'submitted'
-  console.log(questions.value)
+  questions.value.forEach(q => q.input?.trim())
+  score.value = questions.value.reduce((acc, cur) => cur.input?.toLowerCase() === cur.answer.toLowerCase() ? acc + 1 : acc, 0)
+}
+
+function reset() {
+  state.value = 'testing'
+  currentId.value = 0
+  score.value = 0
+  questions.value.forEach(q => q.input = undefined)
 }
 </script>
 
@@ -230,13 +156,22 @@ function submit() {
           </NuxtLink>
 
           <div class="flex justify-end">
-            <Button @click="submit">
+            <Button v-if="state === 'testing'" @click="submit">
               submit
+            </Button>
+            <Button v-if="state === 'submitted'" @click="reset">
+              reset
             </Button>
           </div>
         </div>
       </div>
     </header>
+
+    <template v-if="!questions.length">
+      <div class="flex items-center justify-center h-full">
+        <LoaderCircle class="size-16 animate-spin stroke-1" />
+      </div>
+    </template>
 
     <template v-if="state === 'testing'">
       <div v-if="currentQuestion" class="px-12 py-8 grid gap-10">
@@ -271,7 +206,10 @@ function submit() {
 
     <template v-if="state === 'submitted'">
       <ScrollArea class="h-[80vh]">
-        <div class="px-12 py-8 grid gap-10">
+        <div class="px-16 py-8 grid gap-10">
+          <p class="text-center underline underline-offset-4">
+            Score: {{ score }}/{{ questions.length }}
+          </p>
           <template
             v-for="q in questions"
             :key="q.id"

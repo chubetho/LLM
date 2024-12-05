@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Loader } from 'lucide-vue-next'
+import { LoaderCircle } from 'lucide-vue-next'
 import { z } from 'zod'
 import BaseMarkdown from '~/components/BaseMarkdown.vue'
 
@@ -123,7 +123,7 @@ function process(title: string, content: string) {
           >
             <template v-if="isGenerating">
               <div class="flex gap-1 items-center">
-                <Loader class="animate-spin size-4" />
+                <LoaderCircle class="animate-spin size-4" />
                 generating
               </div>
             </template>

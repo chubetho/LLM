@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Loader, Pen, Plus, Sparkle, Trash } from 'lucide-vue-next'
+import { ArrowLeft, LoaderCircle, Pen, Plus, Sparkle, Trash } from 'lucide-vue-next'
 
 type Card = NonNullable<NewSet['cards']>[0]
 type NewCard = Omit<Card, 'id'>
@@ -147,7 +147,7 @@ async function create() {
           @click="create"
         >
           <div v-if="isCreating" class="flex gap-1 items-center">
-            <Loader class="size-4 animate-spin" />
+            <LoaderCircle class="size-4 animate-spin" />
             creating
           </div>
           <template v-else>
@@ -203,7 +203,7 @@ async function create() {
               @click="appendCardsAuto"
             >
               <template v-if="isAppending">
-                <Loader class="size-4 animate-spin" />
+                <LoaderCircle class="size-4 animate-spin" />
                 generating
               </template>
               <template v-else>
