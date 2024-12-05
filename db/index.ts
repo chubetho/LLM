@@ -1,4 +1,10 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import Database from 'better-sqlite3'
 
-export const db = new Database('./db/db.sqlite', { fileMustExist: true })
-db.loadExtension('./db/vec0.dylib')
+const parentPath = import.meta.dev ? './db' : path.join(fileURLToPath(import.meta.url), '..')
+const dbPath = path.join(parentPath, 'db.sqlite')
+const extensionPath = path.join(parentPath, 'vec0.dylib')
+
+export const db = new Database(dbPath, { fileMustExist: true })
+db.loadExtension(extensionPath)

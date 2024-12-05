@@ -1,5 +1,5 @@
 import type { Message, ModelDetails } from 'ollama'
-import ollama from 'ollama'
+import ollama from 'ollama/browser'
 import { DEFAULT_TOOLS_CONFIG } from './constants'
 
 interface ChatOption {
