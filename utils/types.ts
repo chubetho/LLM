@@ -30,6 +30,7 @@ export interface Set {
   tags: string[]
   embedding?: any
   createAt: string
+  match?: number
 }
 
 export type NewSet = Omit<Set, 'id'>
@@ -38,6 +39,7 @@ export type Message =
 (
   { role: 'assistant' | 'user' } |
   { role: 'system', type: 'text' } |
-  { role: 'system', type: 'file', name: string }
+  { role: 'system', type: 'file', name: string } |
+  { role: 'system', type: 'hidden' }
 ) &
 { content: string }

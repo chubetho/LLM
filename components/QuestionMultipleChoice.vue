@@ -29,8 +29,8 @@ const { ask, explanation } = useQuestionAsk(q)
 
 <template>
   <div v-if="q" class="grid gap-4">
-    <h3 class="flex gap-2 text-lg items-center">
-      <span :class="textClass ?? 'text-muted-foreground'">#{{ props.question.id + 1 }}.</span>
+    <h3 class="flex gap-2 text-lg items-start">
+      <span :class="textClass || 'text-muted-foreground'">#{{ props.question.id + 1 }}.</span>
       <span :class="textClass">{{ props.question.question }}</span>
       <Popover v-if="context.state.value === 'submitted'">
         <PopoverTrigger as="div" class="ml-auto">
@@ -49,7 +49,7 @@ const { ask, explanation } = useQuestionAsk(q)
       >
         <button
           v-if="context.state.value === 'testing'"
-          class="block w-full text-left border p-4 rounded-lg transition-colors"
+          class="flex size-full text-left border p-4 rounded-lg transition-colors"
           :class="
             [
               q.input === o ? 'bg-secondary border-primary' : 'hover:border-primary',
@@ -61,7 +61,7 @@ const { ask, explanation } = useQuestionAsk(q)
 
         <button
           v-if="context.state.value === 'submitted'"
-          class="block w-full text-left border p-4 rounded-lg transition-colors"
+          class="flex size-full text-left border p-4 rounded-lg transition-colors"
           :class="
             [
               o === q.answer ? 'bg-green-400 dark:bg-green-700/60 border-primary' : '',

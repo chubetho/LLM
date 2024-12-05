@@ -42,17 +42,6 @@ function toggleColorMode() {
         </Button>
       </NuxtLink>
 
-      <DevOnly>
-        <NuxtLink to="/debug" active-class="[&>button]:bg-muted">
-          <Button
-            variant="ghost"
-            size="icon"
-          >
-            <Bug class="size-5" />
-          </Button>
-        </NuxtLink>
-      </DevOnly>
-
       <div class="mt-auto flex flex-col">
         <Button
           variant="ghost"

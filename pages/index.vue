@@ -45,7 +45,10 @@ const showSets = computed(() => foundSets.value?.length ? foundSets.value : sets
         <template v-if="showSets">
           <li v-for="set in showSets" :key="set.id">
             <NuxtLink class="group" :to="`/sets/${set.id}`">
-              <Card class="group-hover:border-primary transition-colors h-full flex flex-col">
+              <Card class="group-hover:border-primary transition-colors h-full flex flex-col relative">
+                <div v-if="set.match" class="absolute right-1 top-0 text-green-600 dark:text-green-700 text-sm">
+                  {{ set.match }}
+                </div>
                 <CardHeader>
                   <CardTitle class="lowercase">
                     {{ set.title }}

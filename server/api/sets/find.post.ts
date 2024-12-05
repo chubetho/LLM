@@ -15,8 +15,7 @@ export default defineEventHandler(async (event) => {
       vec_distance_cosine(embedding, ?) as distance
     from sets
 
-    order by distance
-    limit 3;
+    order by distance;
   `
   const response = db.prepare(script).all(JSON.stringify(embedding)) as any[]
   if (!response?.length)
@@ -28,5 +27,6 @@ export default defineEventHandler(async (event) => {
     cards: JSON.parse(s.cards),
     tags: JSON.parse(s.tags),
     createAt: s.createAt,
+    match: Math.floor((1 - s.distance) * 100),
   } as Set))
 })

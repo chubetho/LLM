@@ -70,15 +70,15 @@ async function parse() {
         >
           <template v-if="getStatus.status.value === 'running'">
             <div class="flex gap-1 items-center">
-              <LoaderCircle class="animate-spin size-4" />
               getting
+              <LoaderCircle class="animate-spin size-4" />
             </div>
           </template>
           <template v-else-if="getStatus.status.value === 'idle'">
-            get info
+            get
           </template>
           <template v-else>
-            info received
+            received
           </template>
         </Button>
       </div>

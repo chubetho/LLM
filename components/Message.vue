@@ -4,61 +4,46 @@ import { Bot } from 'lucide-vue-next'
 const props = defineProps<{
   message: Message
 }>()
-
-const containerClass = computed(() => {
-  switch (props.message.role) {
-    case 'user':{
-      return 'self-end max-w-[75%]'
-    }
-    case 'system':{
-      if (props.message.type === 'file')
-        return 'self-end'
-      return 'self-center'
-    }
-    case 'assistant':{
-      return 'flex items-start'
-    }
-    default: return ''
-  }
-})
-
-const contentClass = computed(() => {
-  switch (props.message.role) {
-    case 'user':{
-      return 'bg-secondary px-3 py-1 rounded-lg'
-    }
-    case 'system':{
-      if (props.message.type === 'file')
-        return 'bg-secondary rounded-lg px-3 py-1'
-      return 'bg-secondary rounded-lg text-sm px-2 py-0.5'
-    }
-    case 'assistant':{
-      return ''
-    }
-    default: return ''
-  }
-})
 </script>
 
 <template>
-  <li v-if="props.message.content" class="" :class="[containerClass]">
-    <template v-if="props.message.role === 'system' && props.message.type === 'file'">
-      <div class="rounded-b-lg w-fit" :class="[contentClass]">
-        {{ props.message.name }}
-      </div>
-    </template>
-
-    <template v-else>
-      <div
-        v-if="props.message.role === 'assistant'"
-        class="size-9 bg-secondary rounded-full flex items-center justify-center mr-3"
-      >
+  <template v-if="props.message.content">
+    <li
+      v-if="props.message.role === 'assistant'"
+      class="flex items-start"
+    >
+      <div class="size-9 bg-secondary rounded-full flex items-center justify-center mr-3">
         <Bot class="size-5" />
       </div>
 
-      <div class="rounded-b-lg w-fit" :class="[contentClass]">
+      <div class="rounded-b-lg w-fit">
         <MDC :value="props.message.content" :tag="false" />
       </div>
-    </template>
-  </li>
+    </li>
+
+    <li
+      v-else-if="props.message.role === 'system' && props.message.type !== 'hidden'"
+      :class="props.message.type === 'file' ? 'self-end' : 'self-center'"
+    >
+      <div
+        v-if="props.message.type === 'file'"
+        class="rounded-b-lg w-fit bg-secondary rounded-lg px-3 py-1"
+      >
+        {{ props.message.name }}
+      </div>
+
+      <div v-else class="rounded-b-lg w-fit bg-secondary rounded-lg text-sm px-3 py-0.5 border border-primary">
+        <MDC :value="props.message.content" :tag="false" />
+      </div>
+    </li>
+
+    <li
+      v-if="props.message.role === 'user'"
+      class="self-end max-w-[75%]"
+    >
+      <div class="rounded-b-lg w-fit bg-secondary px-3 py-1 rounded-lg">
+        <MDC :value="props.message.content" :tag="false" />
+      </div>
+    </li>
+  </template>
 </template>

@@ -107,10 +107,18 @@ watch(files, async (v) => {
 
   messages.value.push({
     role: 'system',
-    content: `You are a helpful assistant knowledgeable about the following document: ${content.toString()}`,
+    content: 'You are a helpful assistant knowledgeable about the following document:',
     type: 'file',
     name: file.name,
   })
+
+  for (const c of $chunk(content.toString(), { max: 2048 })) {
+    messages.value.push({
+      role: 'system',
+      content: c,
+      type: 'hidden',
+    })
+  }
 })
 </script>
 

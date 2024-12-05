@@ -37,7 +37,7 @@ async function generateSet() {
     "title": string, // A concise title summarizing the card set
     "cards": Array<{
       "term": string, // The term or key concept for the card
-      "def": string   // A clear and accurate definition or explanation
+      "def": string   // A short, clear and accurate definition or explanation
     }>
   }
   `,
@@ -47,7 +47,6 @@ async function generateSet() {
   isGenerating.value = false
 
   const set = setSchema.safeParse(JSON.parse(response))
-  console.log(set)
 
   if (set.error || !set.data) {
     console.error(set.error)
@@ -63,15 +62,19 @@ function process(title: string, content: string) {
 
   data.value = { title, content }
 
-  const messages = $chunk(content, { max: 2048 }).map(c => ({
-    role: 'system',
-    content: c,
-  }))
+  const messages = [
+    {
+      role: 'system',
+      content: 'Given a text in small chunks',
+    },
+  ]
 
-  messages.unshift({
-    role: 'system',
-    content: 'Provide a text in small chunks',
-  })
+  for (const c of $chunk(content, { max: 2048 })) {
+    messages.push({
+      role: 'system',
+      content: c,
+    })
+  }
 
   messages.push({
     role: 'user',
@@ -123,8 +126,8 @@ function process(title: string, content: string) {
           >
             <template v-if="isGenerating">
               <div class="flex gap-1 items-center">
-                <LoaderCircle class="animate-spin size-4" />
                 generating
+                <LoaderCircle class="animate-spin size-4" />
               </div>
             </template>
             <template v-else>

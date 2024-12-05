@@ -14,7 +14,6 @@ const set = ref<NewSet>({
 })
 
 if (setFromDocument.value) {
-  console.log(setFromDocument.value)
   set.value.title = setFromDocument.value.title
   for (const c of setFromDocument.value.cards) {
     set.value.cards.push({
@@ -147,8 +146,8 @@ async function create() {
           @click="create"
         >
           <div v-if="isCreating" class="flex gap-1 items-center">
-            <LoaderCircle class="size-4 animate-spin" />
             creating
+            <LoaderCircle class="size-4 animate-spin" />
           </div>
           <template v-else>
             create
@@ -203,8 +202,8 @@ async function create() {
               @click="appendCardsAuto"
             >
               <template v-if="isAppending">
-                <LoaderCircle class="size-4 animate-spin" />
                 generating
+                <LoaderCircle class="size-4 animate-spin" />
               </template>
               <template v-else>
                 <Sparkle class="size-4 animate-pulse" />

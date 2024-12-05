@@ -21,6 +21,7 @@ const currentQuestion = computed(() => questions.value.find(q => q.id === curren
 const progress = computed(() => Math.floor((currentId.value + 1) * 100 / questions.value.length))
 const score = ref(0)
 
+const attempt = ref(1)
 async function generate() {
   if (!set.value)
     return
@@ -119,10 +120,13 @@ You are a knowledgeable teacher tasked with creating educational questions in JS
 
   if (error) {
     console.error('Invalid data:', parsed)
-    throw new Error(error.message)
+    attempt.value++
+    generate()
+    return
   }
 
   questions.value = data.questions.map((q, id) => ({ ...q, id, input: undefined }))
+  console.log(questions.value)
 }
 
 onMounted(() => {
@@ -156,10 +160,18 @@ function reset() {
           </NuxtLink>
 
           <div class="flex justify-end">
-            <Button v-if="state === 'testing'" @click="submit">
+            <Button
+              v-if="state === 'testing'"
+              :disabled="!questions.length"
+              @click="submit"
+            >
               submit
             </Button>
-            <Button v-if="state === 'submitted'" @click="reset">
+            <Button
+              v-if="state === 'submitted'"
+              :disabled="!questions.length"
+              @click="reset"
+            >
               reset
             </Button>
           </div>
@@ -169,7 +181,10 @@ function reset() {
 
     <template v-if="!questions.length">
       <div class="flex items-center justify-center h-full">
-        <LoaderCircle class="size-16 animate-spin stroke-1" />
+        <div class="flex gap-4 flex-col items-center justify-center">
+          <LoaderCircle class="size-16 animate-spin stroke-1" />
+          <span class="text-muted-foreground text-sm">attempt {{ attempt }}</span>
+        </div>
       </div>
     </template>
 

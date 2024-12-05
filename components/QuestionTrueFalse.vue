@@ -29,10 +29,9 @@ const { ask, explanation } = useQuestionAsk(q)
 
 <template>
   <div v-if="q" class="grid gap-4">
-    <h3 class="flex gap-2 text-lg items-center">
-      <span :class="textClass ?? 'text-muted-foreground'">#{{ props.question.id + 1 }}.</span>
+    <h3 class="flex gap-2 text-lg items-start">
+      <span :class="textClass || 'text-muted-foreground'">#{{ props.question.id + 1 }}.</span>
       <span :class="textClass">{{ props.question.question }}</span>
-
       <Popover v-if="context.state.value === 'submitted'">
         <PopoverTrigger as="div" class="ml-auto">
           <QuestionAskButton @click="ask" />
