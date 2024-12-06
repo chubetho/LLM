@@ -25,7 +25,7 @@ const showSets = computed(() => foundSets.value?.length ? foundSets.value : sets
 <template>
   <BasePageWrap>
     <template #heading>
-      all quizzes
+      all sets
     </template>
 
     <div class="space-y-4">

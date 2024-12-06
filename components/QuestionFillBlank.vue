@@ -12,7 +12,7 @@ const textClass = computed(() => {
     return ''
 
   if (q.input === q.answer)
-    return 'text-green-400 dark:text-green-700'
+    return 'text-green-600 dark:text-green-700'
 
   return ''
 })
@@ -43,9 +43,9 @@ const { ask, explanation } = useQuestionAsk(q)
 
     <div
       v-if="context.state.value === 'submitted'"
-      class="border p-4 rounded-lg border-primary"
+      class="border p-4 rounded-lg ring"
       :class="
-        [q.input === q.answer ? 'bg-green-400 dark:bg-green-700/60' : ' bg-destructive',
+        [q.input === q.answer ? 'ring-green-600 dark:ring-green-800' : ' ring-destructive',
          q.input ? '' : 'text-muted-foreground',
         ]"
     >

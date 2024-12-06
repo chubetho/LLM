@@ -7,16 +7,20 @@ interface ChatOption {
   endSymbol?: boolean
 }
 
-export async function $gen(input: string, opt?: ChatOption) {
+export function $abort() {
+  ollama.abort()
+}
+
+export async function $gen(prompt: string, opt?: ChatOption) {
   const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
 
   $abort()
 
   const { format = undefined } = opt || {}
 
-  const response = await ollama.chat({
+  const response = await ollama.generate({
     model: toolsConfig.value.name,
-    messages: [{ role: 'user', content: input }],
+    prompt,
     format,
     options: {
       temperature: toolsConfig.value.temperature,
@@ -25,23 +29,19 @@ export async function $gen(input: string, opt?: ChatOption) {
     },
   })
 
-  return response.message.content
+  return response.response
 }
 
-export function $abort() {
-  ollama.abort()
-}
-
-export async function $genStream(input: string, cb: (o: string) => void, opt?: ChatOption) {
+export async function $genStream(prompt: string, cb: (o: string) => void, opt?: ChatOption) {
   const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
 
   $abort()
 
   const { format = undefined, endSymbol } = opt || {}
 
-  const response = await ollama.chat({
+  const response = await ollama.generate({
     model: toolsConfig.value.name,
-    messages: [{ role: 'user', content: input }],
+    prompt,
     format,
     stream: true,
     options: {
@@ -51,8 +51,8 @@ export async function $genStream(input: string, cb: (o: string) => void, opt?: C
     },
   })
 
-  for await (const part of response) {
-    cb(part.message.content)
+  for await (const r of response) {
+    cb(r.response)
   }
   if (endSymbol)
     cb('__end__')

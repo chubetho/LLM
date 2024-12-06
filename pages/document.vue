@@ -95,7 +95,7 @@ function process(title: string, content: string) {
 <template>
   <BasePageWrap>
     <template #heading>
-      summary
+      summarize
     </template>
 
     <div class="flex gap-4 flex-col pb-4">

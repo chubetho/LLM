@@ -1,9 +1,8 @@
 import { db } from '~/db'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
-  if (!id)
-    return
+  const body = await readBody(event)
+  const id = body.id
 
-  db.prepare('delete from table sets where id = ?').run(id)
+  db.prepare('delete from sets where id = ?').run(id)
 })

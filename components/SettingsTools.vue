@@ -103,15 +103,42 @@ async function send() {
 
           <div class="grid grid-cols-3 gap-4">
             <div class="grid gap-3">
-              <Label for="tools_temperature">temperature</Label>
+              <Label for="tools_temperature">
+                <HoverCard>
+                  <HoverCardTrigger>
+                    <span class="border-b-2 border-dashed cursor-pointer dark:border-primary/50">temperature?</span>
+                  </HoverCardTrigger>
+                  <HoverCardContent>
+                    Controls randomness. Higher values yield more creative outputs; lower values make responses more focused.
+                  </HoverCardContent>
+                </HoverCard>
+              </Label>
               <Input id="tools_temperature" v-model="toolsConfig.temperature" type="number" min="0" step="0.1" />
             </div>
             <div class="grid gap-3">
-              <Label for="tools_top-k">top k</Label>
+              <Label for="tools_top-k">
+                <HoverCard>
+                  <HoverCardTrigger>
+                    <span class="border-b-2 border-dashed cursor-pointer dark:border-primary/50">top-k?</span>
+                  </HoverCardTrigger>
+                  <HoverCardContent>
+                    Restricts choices to the top-k most probable tokens, affecting diversity—higher values increase randomness, lower values make output predictable.
+                  </HoverCardContent>
+                </HoverCard>
+              </Label>
               <Input id="tools_top-k" v-model="toolsConfig.topK" type="number" min="1" step="1" />
             </div>
             <div class="grid gap-3">
-              <Label for="tools_top-p">top p</Label>
+              <Label for="tools_top-p">
+                <HoverCard>
+                  <HoverCardTrigger>
+                    <span class="border-b-2 border-dashed cursor-pointer dark:border-primary/50">top-p?</span>
+                  </HoverCardTrigger>
+                  <HoverCardContent>
+                    Limits token selection to those whose combined probability is greater than p, balancing creativity and coherence.
+                  </HoverCardContent>
+                </HoverCard>
+              </Label>
               <Input id="tools_top-p" v-model="toolsConfig.topP" type="number" min="0" step="0.05" max="1" />
             </div>
           </div>

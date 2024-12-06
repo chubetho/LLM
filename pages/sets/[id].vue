@@ -33,7 +33,10 @@ watch(api, (api) => {
 const isDeleting = ref(false)
 async function deleteSet() {
   isDeleting.value = true
-  await $fetch(`/api/sets/delete/${id}`)
+  await $fetch(`/api/sets/delete`, {
+    method: 'POST',
+    body: { id },
+  })
   await navigateTo('/')
   isDeleting.value = false
 }

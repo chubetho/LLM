@@ -130,7 +130,7 @@ async function create() {
     <template #heading>
       <NuxtLink to="/" class="inline-flex items-center gap-2">
         <ArrowLeft class="size-4" />
-        <span>create new quiz</span>
+        <span>create new set</span>
       </NuxtLink>
     </template>
 

@@ -193,11 +193,9 @@ function reset() {
         <Progress :model-value="progress" class="h-1" />
 
         <div class="min-h-52">
-          <KeepAlive>
-            <QuestionFillBlank v-if="currentQuestion.type === 'fill_blank'" :question="currentQuestion" />
-            <QuestionMultipleChoice v-else-if="currentQuestion.type === 'multiple_choice'" :question="currentQuestion" />
-            <QuestionTrueFalse v-else-if="currentQuestion.type === 'true_false'" :question="currentQuestion" />
-          </KeepAlive>
+          <QuestionFillBlank v-if="currentQuestion.type === 'fill_blank'" :question="currentQuestion" />
+          <QuestionMultipleChoice v-else-if="currentQuestion.type === 'multiple_choice'" :question="currentQuestion" />
+          <QuestionTrueFalse v-else-if="currentQuestion.type === 'true_false'" :question="currentQuestion" />
         </div>
 
         <div class="flex justify-between">

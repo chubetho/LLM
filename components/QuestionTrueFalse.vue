@@ -19,7 +19,7 @@ const textClass = computed(() => {
     return ''
 
   if (q.input === q.answer)
-    return 'text-green-400 dark:text-green-700'
+    return 'text-green-600 dark:text-green-700'
 
   return ''
 })
@@ -61,8 +61,8 @@ const { ask, explanation } = useQuestionAsk(q)
           class="block w-full text-left border p-4 rounded-lg transition-colors"
           :class="
             [
-              o === q.answer ? 'bg-green-400 dark:bg-green-700/60 border-primary' : '',
-              o === q.input && q.input !== q.answer ? 'bg-destructive border-primary' : '',
+              o === q.answer ? 'ring ring-green-600 dark:ring-green-800' : '',
+              o === q.input && q.input !== q.answer ? 'ring ring-destructive' : '',
             ]"
         >
           {{ o }}
