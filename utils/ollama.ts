@@ -11,44 +11,42 @@ export function $abort() {
   ollama.abort()
 }
 
-export async function $gen(prompt: string, opt?: ChatOption) {
+function getConfig() {
   const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
-
-  $abort()
-
-  const { format = undefined } = opt || {}
-
-  const response = await ollama.generate({
+  return {
     model: toolsConfig.value.name,
-    prompt,
-    format,
     options: {
       temperature: toolsConfig.value.temperature,
       top_k: toolsConfig.value.topK,
       top_p: toolsConfig.value.topP,
     },
+  }
+}
+
+export async function $gen(prompt: string, opt?: ChatOption) {
+  $abort()
+
+  const { format = undefined } = opt || {}
+
+  const response = await ollama.generate({
+    prompt,
+    format,
+    ...getConfig(),
   })
 
   return response.response
 }
 
 export async function $genStream(prompt: string, cb: (o: string) => void, opt?: ChatOption) {
-  const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
-
   $abort()
 
   const { format = undefined, endSymbol } = opt || {}
 
   const response = await ollama.generate({
-    model: toolsConfig.value.name,
     prompt,
     format,
     stream: true,
-    options: {
-      temperature: toolsConfig.value.temperature,
-      top_k: toolsConfig.value.topK,
-      top_p: toolsConfig.value.topP,
-    },
+    ...getConfig(),
   })
 
   for await (const r of response) {
@@ -58,23 +56,30 @@ export async function $genStream(prompt: string, cb: (o: string) => void, opt?: 
     cb('__end__')
 }
 
-export async function $chat(messages: Message[], cb: (o: string) => void, opt?: ChatOption) {
-  const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
+export async function $chat(messages: Message[], opt?: ChatOption) {
+  $abort()
 
+  const { format = undefined } = opt || {}
+
+  const response = await ollama.chat({
+    messages,
+    format,
+    ...getConfig(),
+  })
+
+  return response.message.content
+}
+
+export async function $chatStream(messages: Message[], cb: (o: string) => void, opt?: ChatOption) {
   $abort()
 
   const { format = undefined, endSymbol } = opt || {}
 
   const response = await ollama.chat({
-    model: toolsConfig.value.name,
     messages,
     format,
     stream: true,
-    options: {
-      temperature: toolsConfig.value.temperature,
-      top_k: toolsConfig.value.topK,
-      top_p: toolsConfig.value.topP,
-    },
+    ...getConfig(),
   })
 
   for await (const part of response) {
@@ -84,35 +89,11 @@ export async function $chat(messages: Message[], cb: (o: string) => void, opt?: 
     cb('__end__')
 }
 
-export async function $chatFast(messages: Message[], opt?: ChatOption) {
-  const toolsConfig = useLocalStorage('llm_tools', DEFAULT_TOOLS_CONFIG)
-
-  $abort()
-
-  const { format = undefined } = opt || {}
-
-  const response = await ollama.chat({
-    model: toolsConfig.value.name,
-    messages,
-    format,
-    options: {
-      temperature: toolsConfig.value.temperature,
-      top_k: toolsConfig.value.topK,
-      top_p: toolsConfig.value.topP,
-    },
-  })
-
-  return response.message.content
-}
-
 export async function $embed(input: string) {
   const response = await ollama.embed({
     model: 'nomic-embed-text',
     input,
   })
-
-  if (response.embeddings.length > 1)
-    throw new Error('expect length = 1')
 
   return response.embeddings[0]
 }

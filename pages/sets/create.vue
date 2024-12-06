@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft, LoaderCircle, Pen, Plus, Sparkle, Trash } from 'lucide-vue-next'
+import { z } from 'zod'
 
 type Card = NonNullable<NewSet['cards']>[0]
-type NewCard = Omit<Card, 'id'>
 const setFromDocument = useState<{ title: string, cards: (Omit<Card, 'id'>)[] }>('set_from_document')
 
 const id = ref(1)
@@ -45,26 +45,34 @@ async function appendCardsAuto() {
 
   isAppending.value = true
   const response = await $gen(
-    `Based on the following reference cards: ${JSON.stringify(set.value.cards)}, generate additional, meaningful cards in JSON format. Each card should adhere to the schema below, follow the structure and type of content of the reference cards, and include unique information. Avoid duplicating topics or reusing exact terms from the reference cards.
+    `Using the reference cards: ${JSON.stringify(set.value.cards)}, generate new, meaningful cards in JSON format. Each card must follow the schema below, match the style and type of content of the reference cards, and provide unique information. Avoid repeating exact terms from the reference cards.
 
-    JSON Schema for the output:
-    {
-      "cards": [
-        {
-          "term": "string",        // The term or concept being defined.
-          "def": "string"          // The detailed definition or explanation of the term.
-        }
-      ]
-    }
+  JSON Schema:
+  {
+    "cards": [
+      {
+        "term": "string",
+        "def": "string"
+      }
+    ]
+  }
 
-    Output should be an array of objects conforming to the schema above. Do not include any additional properties such as "id".`,
+  Output only an array of JSON objects conforming to the schema.`,
     { format: 'json' },
   )
 
-  const _cards = JSON.parse(response).cards as NewCard[]
-  for (const c of _cards) {
-    if (!c.term || !c.def)
-      continue
+  const zodSchema = z.object({
+    cards: z.object({ term: z.string(), def: z.string() }).array(),
+  })
+
+  const { data, error } = zodSchema.safeParse(JSON.parse(response))
+
+  if (!data || error) {
+    isAppending.value = false
+    return
+  }
+
+  for (const c of data.cards) {
     set.value.cards.push({
       id: id.value++,
       term: c.term,
@@ -79,13 +87,14 @@ function deleteCard(id: number) {
   set.value.cards = set.value.cards.filter(card => card.id !== id)
 }
 
-async function generateDef(c: Card) {
+async function genDef(c: Card) {
   if (!c.term)
     return
   c.def = ''
-  await $genStream(`Provide a short, main-content definition for the term "${c.term}". Keep it concise.`, (output) => {
-    c.def += output
-  })
+  await $genStream(
+    `"${c.term}": Provide a short, plain text definition without any redundant information.`,
+    o => c.def += o,
+  )
 }
 
 const isCreating = ref(false)
@@ -182,7 +191,7 @@ async function create() {
               <button
                 class="absolute top-3 right-4 group disabled:text-primary/50"
                 :disabled="!card.term"
-                @click="generateDef(card)"
+                @click="genDef(card)"
               >
                 <Sparkle class="size-4 animate-pulse group-disabled:animate-none" />
               </button>

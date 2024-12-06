@@ -83,12 +83,9 @@ function process(title: string, content: string) {
 
   output.value[currentTab.value] = ''
 
-  $chat(messages, (outputText) => {
-    if (outputText === '__end__') {
-      return
-    }
+  $chatStream(messages, (outputText) => {
     output.value[currentTab.value] += outputText
-  }, { endSymbol: true })
+  })
 }
 </script>
 

@@ -35,8 +35,8 @@ importers:
         specifier: ^3.14.1592
         version: 3.14.1592(@parcel/watcher@2.5.0)(@types/node@22.9.1)(better-sqlite3@11.6.0)(drizzle-orm@0.36.3(@types/better-sqlite3@7.6.12)(better-sqlite3@11.6.0))(eslint@9.15.0(jiti@2.4.1))(ioredis@5.4.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.27.3)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.9.1)(terser@5.36.0))
       ollama:
-        specifier: ^0.5.10
-        version: 0.5.10
+        specifier: ^0.5.11
+        version: 0.5.11
       pdf-parse:
         specifier: ^1.1.1
         version: 1.1.1(patch_hash=nkx2m2oit3tpcrzqwr6y7boyze)
@@ -44,8 +44,8 @@ importers:
         specifier: 23.8.0
         version: 23.8.0(typescript@5.6.3)
       radix-vue:
-        specifier: ^1.9.10
-        version: 1.9.10(vue@3.5.13(typescript@5.6.3))
+        specifier: ^1.9.11
+        version: 1.9.11(vue@3.5.13(typescript@5.6.3))
       tailwind-merge:
         specifier: ^2.5.5
         version: 2.5.5
@@ -3821,8 +3821,8 @@ packages:
   ohash@1.1.4:
     resolution: {integrity: sha512-FlDryZAahJmEF3VR3w1KogSEdWX3WhA5GPakFx4J81kEAiHyLMpdLLElS8n8dfNadMgAne/MywcvmogzscVt4g==}
 
-  ollama@0.5.10:
-    resolution: {integrity: sha512-M5O4u6S6yZeeKFrKA7ZfGGLjK54otOVGPrOUc3N64zSTpz9J+x/nh93dmD6Py7YLgXzq9I6Nq+PDDoaqJuV3LQ==}
+  ollama@0.5.11:
+    resolution: {integrity: sha512-lDAKcpmBU3VAOGF05NcQipHNKTdpKfAHpZ7bjCsElkUkmX7SNZImi6lwIxz/l1zQtLq0S3wuLneRuiXxX2KIew==}
 
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
@@ -4313,8 +4313,8 @@ packages:
   queue-tick@1.0.1:
     resolution: {integrity: sha512-kJt5qhMxoszgU/62PLP1CJytzd2NKetjSRnyuj31fDd3Rlcz3fzlFdFLD1SItunPwyqEOkca6GbV612BWfaBag==}
 
-  radix-vue@1.9.10:
-    resolution: {integrity: sha512-+4+J1v5A+4wbkyVr7VcjR1Zpm3K2hWJQCLgAiHSdrISaj+hPqYSeppP4yTnXQAI4B99myyihxkiC63YhTuvFBw==}
+  radix-vue@1.9.11:
+    resolution: {integrity: sha512-C+MtJ66jf8J28DO5bKgNwhGCi6WQYuEosD/tY/Orry9BTDcuF/Mps4HlFd2Tq4YlXF44BEPLQ2Paz89Mz70ZgA==}
     peerDependencies:
       vue: '>= 3.2.0'
 
@@ -9909,7 +9909,7 @@ snapshots:
 
   ohash@1.1.4: {}
 
-  ollama@0.5.10:
+  ollama@0.5.11:
     dependencies:
       whatwg-fetch: 3.6.20
 
@@ -10429,7 +10429,7 @@ snapshots:
 
   queue-tick@1.0.1: {}
 
-  radix-vue@1.9.10(vue@3.5.13(typescript@5.6.3)):
+  radix-vue@1.9.11(vue@3.5.13(typescript@5.6.3)):
     dependencies:
       '@floating-ui/dom': 1.6.12
       '@floating-ui/vue': 1.1.5(vue@3.5.13(typescript@5.6.3))

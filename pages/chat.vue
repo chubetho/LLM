@@ -34,7 +34,7 @@ async function send() {
   })
   content.value = ''
 
-  await $chat(messages.value, (o) => {
+  await $chatStream(messages.value, (o) => {
     if (status.status.value === 'idle') {
       return
     }

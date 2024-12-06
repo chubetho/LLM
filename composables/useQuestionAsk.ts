@@ -21,7 +21,7 @@ export function useQuestionAsk(q: Question | undefined) {
       },
     ]
 
-    await $chat(messages, o => explanation.value += o)
+    await $chatStream(messages, o => explanation.value += o)
   }
 
   return { explanation, ask }

@@ -100,7 +100,7 @@ You are a knowledgeable teacher tasked with creating educational questions in JS
 - Do not include explanations, comments, or text outside the JSON object.
 `
 
-  const res = await $chatFast(
+  const res = await $chat(
     [
       {
         role: 'system',
@@ -126,7 +126,6 @@ You are a knowledgeable teacher tasked with creating educational questions in JS
   }
 
   questions.value = data.questions.map((q, id) => ({ ...q, id, input: undefined }))
-  console.log(questions.value)
 }
 
 onMounted(() => {
