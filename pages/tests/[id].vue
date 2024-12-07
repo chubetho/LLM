@@ -21,7 +21,6 @@ const currentQuestion = computed(() => questions.value.find(q => q.id === curren
 const progress = computed(() => Math.floor((currentId.value + 1) * 100 / questions.value.length))
 const score = ref(0)
 
-const attempt = ref(1)
 async function generate() {
   if (!set.value)
     return
@@ -100,7 +99,8 @@ You are a knowledgeable teacher tasked with creating educational questions in JS
 - Do not include explanations, comments, or text outside the JSON object.
 `
 
-  const res = await $chat(
+  const schema = z.object({ questions: z.array(questionSchema) })
+  const response = await $chat(
     [
       {
         role: 'system',
@@ -111,21 +111,10 @@ You are a knowledgeable teacher tasked with creating educational questions in JS
         content: JSON.stringify(set.value.cards),
       },
     ],
-    { format: 'json' },
+    { schema },
   )
 
-  const parsed = JSON.parse(res)
-  const zodSchema = z.object({ questions: z.array(questionSchema) })
-  const { data, error } = zodSchema.safeParse(parsed)
-
-  if (error) {
-    console.error('Invalid data:', parsed)
-    attempt.value++
-    generate()
-    return
-  }
-
-  questions.value = data.questions.map((q, id) => ({ ...q, id, input: undefined }))
+  questions.value = response.questions.map((q, id) => ({ ...q, id, input: undefined }))
 }
 
 onMounted(() => {
@@ -180,9 +169,9 @@ function reset() {
 
     <template v-if="!questions.length">
       <div class="flex items-center justify-center h-full">
-        <div class="flex gap-4 flex-col items-center justify-center">
+        <div class="flex gap-2 flex-col items-center justify-center">
           <LoaderCircle class="size-16 animate-spin stroke-1" />
-          <span class="text-muted-foreground text-sm">attempt {{ attempt }}</span>
+          <span class="text-muted-foreground text-sm">generating...</span>
         </div>
       </div>
     </template>

@@ -28,6 +28,16 @@ else {
   appendCardManually()
 }
 
+async function genDef(c: Card) {
+  if (!c.term)
+    return
+  c.def = ''
+  await $genStream(
+    `"${c.term}": Provide a short, plain text definition without any redundant information.`,
+    o => c.def += o,
+  )
+}
+
 function appendCardManually() {
   set.value.cards.push({
     id: id.value++,
@@ -39,40 +49,19 @@ function appendCardManually() {
 const canAutoAdd = computed(() => set.value.cards.some(c => c.term?.length && c.def?.length))
 
 const isAppending = ref(false)
-async function appendCardsAuto() {
+async function autoAppendCards() {
   if (!canAutoAdd.value)
     return
 
   isAppending.value = true
-  const response = await $gen(
-    `Using the reference cards: ${JSON.stringify(set.value.cards)}, generate new, meaningful cards in JSON format. Each card must follow the schema below, match the style and type of content of the reference cards, and provide unique information. Avoid repeating exact terms from the reference cards.
-
-  JSON Schema:
-  {
-    "cards": [
-      {
-        "term": "string",
-        "def": "string"
-      }
-    ]
-  }
-
-  Output only an array of JSON objects conforming to the schema.`,
-    { format: 'json' },
+  const schema = z.array(z.object({ term: z.string(), def: z.string() }))
+  const _cards = set.value.cards.map(({ term, def }) => ({ term, def }))
+  const cards = await $generate(
+    `Generate new cards in JSON format based on the reference cards: ${JSON.stringify(_cards)}. Return only the JSON array but not in code block.`,
+    { schema },
   )
 
-  const zodSchema = z.object({
-    cards: z.object({ term: z.string(), def: z.string() }).array(),
-  })
-
-  const { data, error } = zodSchema.safeParse(JSON.parse(response))
-
-  if (!data || error) {
-    isAppending.value = false
-    return
-  }
-
-  for (const c of data.cards) {
+  for (const c of cards) {
     set.value.cards.push({
       id: id.value++,
       term: c.term,
@@ -87,16 +76,6 @@ function deleteCard(id: number) {
   set.value.cards = set.value.cards.filter(card => card.id !== id)
 }
 
-async function genDef(c: Card) {
-  if (!c.term)
-    return
-  c.def = ''
-  await $genStream(
-    `"${c.term}": Provide a short, plain text definition without any redundant information.`,
-    o => c.def += o,
-  )
-}
-
 const isCreating = ref(false)
 async function create() {
   isCreating.value = true
@@ -105,19 +84,20 @@ async function create() {
   if (!_set.cards.length)
     return
 
-  const response = await $gen(
-    `Using the dataset: ${JSON.stringify(_set.cards)}, create a JSON object with the following schema:
-  {
-    "title": "string", // A descriptive and meaningful string that summarizes the dataset.
-    "tags": ["string"] // An array of 1 to 4 single-word strings that characterize the dataset.
-  }
-  Only include these properties and exclude all others.`,
-    { format: 'json' },
-  )
-  const { title, tags } = JSON.parse(response) as { title: string, tags: string[] }
+  const schema = z.object({
+    title: z.string().trim().toLowerCase().min(3).describe('A clear and concise title summarizing the dataset in lowercase. Minimum 3 characters.'),
+    tags: z.array(z.string().trim().toLowerCase()).min(4).describe('An array of at least 4 lowercase, single-word strings that describe the dataset.'),
+  })
 
-  _set.title = set.value.title || title.toLowerCase()
-  _set.tags = tags
+  const response = await $generate(
+    `Based on the dataset provided below, generate a descriptive "title" and at least 4 meaningful "tags" that best characterize the dataset.
+  
+  Dataset: ${JSON.stringify(_set.cards)}`,
+    { schema },
+  )
+
+  _set.title = set.value.title || response.title
+  _set.tags = response.tags
   _set.embedding = await $embed(JSON.stringify({
     title: _set.title,
     cards: _set.cards,
@@ -208,7 +188,7 @@ async function create() {
               v-if="canAutoAdd"
               class="grow py-3 bg-secondary rounded-lg flex justify-center items-center gap-1 text-sm disabled:opacity-50"
               :disabled="!canAutoAdd || isAppending"
-              @click="appendCardsAuto"
+              @click="autoAppendCards"
             >
               <template v-if="isAppending">
                 generating

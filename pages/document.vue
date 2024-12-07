@@ -12,11 +12,6 @@ const output = ref({
 })
 const summary = computed(() => output.value[currentTab.value])
 
-const setSchema = z.object({
-  title: z.string(),
-  cards: z.object({ term: z.string(), def: z.string() }).array(),
-})
-
 const processStatus = useStatus()
 
 const isGenerating = ref(false)
@@ -26,38 +21,28 @@ async function generateSet() {
 
   isGenerating.value = true
 
-  const response = await $gen(
-    `
-  Generate meaningful cards in JSON format based on the provided summary:
+  const schema = z.object({
+    title: z.string().describe('A concise title summarizing the card set'),
+    cards: z.object({
+      term: z.string().describe('The term or key concept for the card'),
+      def: z.string().describe('A short, clear and accurate definition or explanation'),
+    }).array(),
+  })
 
-  Summary: ${summary.value}
-
-  Output schema:
-  {
-    "title": string, // A concise title summarizing the card set
-    "cards": Array<{
-      "term": string, // The term or key concept for the card
-      "def": string   // A short, clear and accurate definition or explanation
-    }>
-  }
+  const response = await $generate(
+    `Generate meaningful cards in JSON format based on the provided summary:
+      Summary: ${summary.value}
   `,
-    { format: 'json' },
+    { schema },
   )
 
   isGenerating.value = false
 
-  const set = setSchema.safeParse(JSON.parse(response))
-
-  if (set.error || !set.data) {
-    console.error(set.error)
-    return
-  }
-
-  useState('set_from_document', () => ({ title: set.data.title, cards: set.data.cards }))
+  useState('set_from_document', () => ({ title: response.title, cards: response.cards }))
   navigateTo('/sets/create')
 }
 
-function process(title: string, content: string) {
+async function process(title: string, content: string) {
   $abort()
 
   data.value = { title, content }
@@ -65,7 +50,7 @@ function process(title: string, content: string) {
   const messages = [
     {
       role: 'system',
-      content: 'Given a text in small chunks',
+      content: 'Given a text in following small chunks:',
     },
   ]
 
@@ -83,7 +68,7 @@ function process(title: string, content: string) {
 
   output.value[currentTab.value] = ''
 
-  $chatStream(messages, (outputText) => {
+  await $chatStream(messages, (outputText) => {
     output.value[currentTab.value] += outputText
   })
 }

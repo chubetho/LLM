@@ -1,11 +1,11 @@
 import type { Message, ModelDetails } from 'ollama'
+import type { ZodSchema } from 'zod'
 import ollama from 'ollama/browser'
+import { zodToJsonSchema } from 'zod-to-json-schema'
 import { DEFAULT_TOOLS_CONFIG } from './constants'
 
-interface ChatOption {
-  format?: 'json'
-  endSymbol?: boolean
-}
+interface NonStreamOption<T = undefined> { schema?: ZodSchema<T> }
+interface StreamOption { endSymbol?: boolean }
 
 export function $abort() {
   ollama.abort()
@@ -23,28 +23,83 @@ function getConfig() {
   }
 }
 
-export async function $gen(prompt: string, opt?: ChatOption) {
+export async function $generate<T = string>(prompt: string, opt?: NonStreamOption<T>): Promise<T> {
   $abort()
 
-  const { format = undefined } = opt || {}
+  const { schema } = opt || {}
+  const format = schema ? zodToJsonSchema(schema) : undefined
+  const config = getConfig()
+  let remainingTries = 5
 
-  const response = await ollama.generate({
-    prompt,
-    format,
-    ...getConfig(),
-  })
+  const generate = async (): Promise<any> => {
+    const response = await ollama.generate({
+      prompt,
+      format,
+      ...config,
+    })
 
-  return response.response
+    if (schema) {
+      try {
+        return schema.parse(JSON.parse(response.response))
+      }
+      catch (error) {
+        console.error(`${error}\nResponse: ${response.response}`)
+        if (remainingTries > 0) {
+          remainingTries--
+          return generate()
+        }
+        throw new Error('Exceeded maximum retry attempts for schema validation.')
+      }
+    }
+
+    return response.response
+  }
+
+  return generate()
 }
 
-export async function $genStream(prompt: string, cb: (o: string) => void, opt?: ChatOption) {
+export async function $chat<T = string>(messages: Message[], opt?: NonStreamOption<T>): Promise<T> {
   $abort()
 
-  const { format = undefined, endSymbol } = opt || {}
+  const { schema } = opt || {}
+  const format = schema ? zodToJsonSchema(schema) : undefined
+  const config = getConfig()
+  let remainingTries = 5
+
+  const chat = async (): Promise<any> => {
+    const response = await ollama.chat({
+      messages,
+      format,
+      ...config,
+    })
+
+    if (schema) {
+      try {
+        return schema.parse(JSON.parse(response.message.content))
+      }
+      catch (error) {
+        console.error(`${error}\nResponse: ${response.message.content}`)
+        if (remainingTries > 0) {
+          remainingTries--
+          return chat()
+        }
+        throw new Error('Exceeded maximum retry attempts for schema validation.')
+      }
+    }
+
+    return response.message.content
+  }
+
+  return chat()
+}
+
+export async function $genStream(prompt: string, cb: (o: string) => void, opt?: StreamOption) {
+  $abort()
+
+  const { endSymbol } = opt || {}
 
   const response = await ollama.generate({
     prompt,
-    format,
     stream: true,
     ...getConfig(),
   })
@@ -56,28 +111,13 @@ export async function $genStream(prompt: string, cb: (o: string) => void, opt?: 
     cb('__end__')
 }
 
-export async function $chat(messages: Message[], opt?: ChatOption) {
+export async function $chatStream(messages: Message[], cb: (o: string) => void, opt?: StreamOption) {
   $abort()
 
-  const { format = undefined } = opt || {}
+  const { endSymbol } = opt || {}
 
   const response = await ollama.chat({
     messages,
-    format,
-    ...getConfig(),
-  })
-
-  return response.message.content
-}
-
-export async function $chatStream(messages: Message[], cb: (o: string) => void, opt?: ChatOption) {
-  $abort()
-
-  const { format = undefined, endSymbol } = opt || {}
-
-  const response = await ollama.chat({
-    messages,
-    format,
     stream: true,
     ...getConfig(),
   })
