@@ -38,21 +38,20 @@ export async function $generate<T = string>(prompt: string, opt?: NonStreamOptio
       ...config,
     })
 
-    if (schema) {
-      try {
-        return schema.parse(JSON.parse(response.response))
-      }
-      catch (error) {
-        console.error(`${error}\nResponse: ${response.response}`)
-        if (remainingTries > 0) {
-          remainingTries--
-          return generate()
-        }
-        throw new Error('Exceeded maximum retry attempts for schema validation.')
-      }
-    }
+    if (!schema)
+      return response.response
 
-    return response.response
+    try {
+      return schema.parse(JSON.parse(response.response))
+    }
+    catch (error) {
+      console.error(`${error}\nResponse: ${response.response}`)
+      if (remainingTries > 0) {
+        remainingTries--
+        return generate()
+      }
+      throw new Error('Exceeded maximum retry attempts for schema validation.')
+    }
   }
 
   return generate()
@@ -73,27 +72,26 @@ export async function $chat<T = string>(messages: Message[], opt?: NonStreamOpti
       ...config,
     })
 
-    if (schema) {
-      try {
-        return schema.parse(JSON.parse(response.message.content))
-      }
-      catch (error) {
-        console.error(`${error}\nResponse: ${response.message.content}`)
-        if (remainingTries > 0) {
-          remainingTries--
-          return chat()
-        }
-        throw new Error('Exceeded maximum retry attempts for schema validation.')
-      }
-    }
+    if (!schema)
+      return response.message.content
 
-    return response.message.content
+    try {
+      return schema.parse(JSON.parse(response.message.content))
+    }
+    catch (error) {
+      console.error(`${error}\nResponse: ${response.message.content}`)
+      if (remainingTries > 0) {
+        remainingTries--
+        return chat()
+      }
+      throw new Error('Exceeded maximum retry attempts for schema validation.')
+    }
   }
 
   return chat()
 }
 
-export async function $genStream(prompt: string, cb: (o: string) => void, opt?: StreamOption) {
+export async function $generateStream(prompt: string, cb: (o: string) => void, opt?: StreamOption) {
   $abort()
 
   const { endSymbol } = opt || {}
@@ -122,8 +120,8 @@ export async function $chatStream(messages: Message[], cb: (o: string) => void, 
     ...getConfig(),
   })
 
-  for await (const part of response) {
-    cb(part.message.content)
+  for await (const r of response) {
+    cb(r.message.content)
   }
   if (endSymbol)
     cb('__end__')

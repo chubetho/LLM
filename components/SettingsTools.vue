@@ -48,7 +48,7 @@ async function send() {
   sendStatus.setStatus('running')
   $abort()
   response.value = ''
-  await $genStream(input.value, (o) => {
+  await $generateStream(input.value, (o) => {
     if (o === '__end__') {
       sendStatus.setStatus('done')
       return

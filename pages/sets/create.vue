@@ -32,7 +32,7 @@ async function genDef(c: Card) {
   if (!c.term)
     return
   c.def = ''
-  await $genStream(
+  await $generateStream(
     `"${c.term}": Provide a short, plain text definition without any redundant information.`,
     o => c.def += o,
   )

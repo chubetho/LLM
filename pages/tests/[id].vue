@@ -26,50 +26,7 @@ async function generate() {
     return
 
   const systemPrompt = `
-You are a knowledgeable teacher tasked with creating educational questions in JSON format. Your goal is to generate exactly ${
-  set.value.cards.length * 2
-} questions based on the user's flashcard data. Ensure all questions are structured properly and follow the format below:
-
-### JSON Structure:
-{
-  "questions": [
-    {
-      "type": "string", // One of: "fill_blank", "multiple_choice", "true_false".
-      "question": "string", // The question text in plain English. For "fill_blank", include the answer as a placeholder (e.g., "The capital of France is ___").
-      "answer": "string", // The correct answer. For "true_false", it must be "true" or "false".
-      "options": ["string", "string", "string", "string"] // Required only for "multiple_choice". Provide exactly 4 options.
-    },
-    ...
-  ]
-}
-
-### Instructions:
-1. **General Requirements**:
-   - Each question must include "type", "question", and "answer".
-   - Ensure all fields are non-empty and formatted correctly.
-   - Base all questions on the user's flashcard data, ensuring accuracy and relevance.
-   - Validate that all questions comply with the provided structure before submitting the JSON object.
-
-2. **Question Types**:
-   - **"fill_blank"**:
-     - Include the answer as a placeholder in the question text (e.g., "The capital of France is ___").
-     - Ensure the placeholder aligns with the correct answer.
-   - **"multiple_choice"**:
-     - Provide exactly 4 unique and relevant options, one of which must be the correct answer.
-     - Example: "What is the capital of France?" with options ["Paris", "London", "Rome", "Berlin"].
-   - **"true_false"**:
-     - The answer must strictly be either "true" or "false".
-     - Example: "The Earth revolves around the Sun."
-
-3. **Validation**:
-   - Ensure the generated JSON object is properly formatted and adheres to the specified structure.
-   - Avoid any additional or unnecessary fields outside the defined structure.
-   - Include only content relevant to the flashcard data provided by the user.
-
-4. **Output Format**:
-   - Respond with a single JSON object containing the "questions" array.
-   - Do not include any text or explanation outside the JSON object.
-   - Ensure your response is clear, concise, and adheres strictly to the requirements.
+You are a knowledgeable teacher tasked with creating educational questions in JSON format. Your goal is to generate exactly ${set.value.cards.length * 2} questions based on the user's flashcard data. Ensure all question types appear at least once, and all questions are structured properly and follow the schema.
 
 ### Example Output:
 {
@@ -92,14 +49,24 @@ You are a knowledgeable teacher tasked with creating educational questions in JS
     }
   ]
 }
-
-### Additional Notes:
-- Ensure variety in question types and alignment with the flashcard content.
-- Focus on generating high-quality educational questions that align with the user's flashcards.
-- Do not include explanations, comments, or text outside the JSON object.
 `
 
-  const schema = z.object({ questions: z.array(questionSchema) })
+  const schema = z.object({
+    questions: z
+      .array(questionSchema)
+      .min(set.value.cards.length * 2)
+      .refine((questions) => {
+        const types = questions.map(q => q.type)
+        return (
+          types.includes('fill_blank')
+          && types.includes('multiple_choice')
+          && types.includes('true_false')
+        )
+      }, {
+        message: 'The questions array must include at least one question of each type: fill_blank, multiple_choice, and true_false.',
+      }),
+  })
+
   const response = await $chat(
     [
       {
@@ -114,7 +81,7 @@ You are a knowledgeable teacher tasked with creating educational questions in JS
     { schema },
   )
 
-  questions.value = response.questions.map((q, id) => ({ ...q, id, input: undefined }))
+  questions.value = response.questions.map((q, id) => ({ ...q, id, input: undefined })) as any
 }
 
 onMounted(() => {
