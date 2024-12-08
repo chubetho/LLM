@@ -22,16 +22,18 @@ async function generateSet() {
   isGenerating.value = true
 
   const schema = z.object({
-    title: z.string().describe('A concise title summarizing the card set'),
-    cards: z.object({
-      term: z.string().describe('The term or key concept for the card'),
-      def: z.string().describe('A short, clear and accurate definition or explanation'),
-    }).array(),
+    title: z.string().describe('A concise and specific title summarizing the card set topic.'),
+    cards: z.array(
+      z.object({
+        term: z.string().describe('A term, keyword, or key concept for the card.'),
+        def: z.string().describe('A short, clear, and accurate definition or explanation of the term.'),
+      }),
+    ).min(1).describe('An array of at least one card containing terms and their definitions.'),
   })
 
   const response = await $generate(
     `Generate meaningful cards in JSON format based on the provided summary:
-      Summary: ${summary.value}
+    Summary: ${summary.value}
   `,
     { schema },
   )

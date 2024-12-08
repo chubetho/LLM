@@ -55,9 +55,8 @@ export type NewSet = Omit<Set, 'id'>
 
 export type Message =
 (
-  { role: 'assistant' | 'user' } |
-  { role: 'system', type: 'text' } |
+  { role: 'system', type: 'text' | 'hidden' } |
   { role: 'system', type: 'file', name: string } |
-  { role: 'system', type: 'hidden' }
+  { role: 'assistant' | 'user' }
 ) &
 { content: string }

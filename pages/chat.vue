@@ -11,7 +11,7 @@ const content = ref('')
 const response = ref('')
 const status = useStatus()
 const DEFAULT_MESSAGES: Message[] = [
-  { role: 'system', content: 'you are an assistant for my studies.', type: 'text' },
+  { role: 'system', content: 'You are an assistant for my studies.', type: 'text' },
 ]
 
 const instruction = useLocalStorage('llm_instruction', () => DEFAULT_MESSAGES[0].content)
@@ -67,6 +67,7 @@ async function stop() {
 
 function clear() {
   messages.value = DEFAULT_MESSAGES
+  instruction.value = DEFAULT_MESSAGES[0].content
 }
 
 function saveInstruction() {

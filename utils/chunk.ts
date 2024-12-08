@@ -3,7 +3,7 @@ interface Option {
 }
 
 export function $chunk(text: string, opt: Partial<Option> = {}) {
-  const { max = 1000 } = opt
+  const { max = 1024 } = opt
 
   const result: string[] = []
   for (let i = 0; true; i++) {
