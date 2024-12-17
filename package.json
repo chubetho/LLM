@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^12.0.0",
-    "better-sqlite3": "^11.6.0",
+    "better-sqlite3": "^11.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-vue": "^8.5.1",
@@ -25,15 +25,15 @@
     "tailwindcss-animate": "^1.0.7",
     "vue": "latest",
     "vue-router": "latest",
-    "zod": "^3.23.8",
-    "zod-to-json-schema": "^3.23.5"
+    "zod": "^3.24.1",
+    "zod-to-json-schema": "^3.24.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^3.11.2",
-    "@nuxt/eslint": "^0.7.2",
+    "@antfu/eslint-config": "^3.12.0",
+    "@nuxt/eslint": "^0.7.3",
     "@nuxt/fonts": "^0.10.3",
     "@nuxtjs/color-mode": "^3.5.2",
-    "@nuxtjs/mdc": "^0.10.0",
+    "@nuxtjs/mdc": "^0.11.1",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@types/better-sqlite3": "^7.6.12",
     "@types/pdf-parse": "^1.1.4",
